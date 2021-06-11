@@ -1,5 +1,5 @@
 # Mostly adapted from https://github.com/pabloariasal/modern-cmake-sample, but simplified.
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.17)
 project(DES-evolutionary-algorithm LANGUAGES C)
 
 add_library(lib src/lib.c)
