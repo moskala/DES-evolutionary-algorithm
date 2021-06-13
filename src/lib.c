@@ -105,7 +105,7 @@ double* fitness_non_Lamarcian(int N, int m, double population[m][N], double popu
     for(int i = 0; i < m; ++i) {
         deleteInfsNaNs(N, population[i]);
         deleteInfsNaNs(N, population_repaired[i]);
-        population_fit[i] = fitness[i];
+        
     }
     // More than one individual
     if(m > 1) {
@@ -140,6 +140,7 @@ double* fitness_non_Lamarcian(int N, int m, double population[m][N], double popu
     else {
         // P_fit <- fitness - move at the beginning 
         for(int i = 0; i < m; ++i) {
+            population_fit[i] = fitness[i];
             double col_sum = 0.0;
             bool all_different = true;
             for(int j = 0; j < N; ++j) {
@@ -150,14 +151,13 @@ double* fitness_non_Lamarcian(int N, int m, double population[m][N], double popu
                 col_sum += pow(population[i][j] - population_repaired[i][j], 2);
             }
             if(all_different) {
-                population_fit[i] = worst_fit +  fitness[i];
+                population_fit[i] = worst_fit +  col_sum;
             }
         }
     }
     // P_fit <- deleteInfsNaNs(P_fit)
     for(int i = 0; i < m; ++i) {
         population_fit[i] = isnan(population_fit[i]) ? DBL_MAX : population_fit[i];
-
     }
     return population_fit;
 }
