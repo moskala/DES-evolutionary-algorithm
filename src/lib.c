@@ -17,6 +17,30 @@ void bounce_back_boundary(int N, double array[N], double lower, double upper) {
     // TODO: deleteInfsNaNs ???
 }
 
+void sort_population(int lambda, int N, double population[lambda][N], double eval[lambda]) {
+    // NB: Just the laziest bubble sort XD
+    // Dr. Kaczmarski would be mad…
+    // It doesn't matter anyway, since population is small.
+    // TODO: Consider using a better sort (but qsort doesn't work well here -.-)
+
+    for (int end = lambda; end > 0; --end) {
+        for (int i = 0; i < end; ++i) {
+            double tmp_pop[N];
+            double tmp_eval;
+
+            if (eval[i] > eval[i + 1]) {
+                memcpy(tmp_pop, population[i], sizeof(tmp_pop));
+                memcpy(population[i], population[i + 1], sizeof(population[i]));
+                memcpy(population[i + 1], tmp_pop, sizeof(population[i + 1]));
+
+                tmp_eval = eval[i];
+                eval[i] = eval[i + 1];
+                eval[i + 1] = tmp_eval;
+            }
+        }
+    }
+}
+
 // TODO: Maybe lower and upper should be arrays of size N
 void des(int N, double initial_point[N], double function(float[N]), double lower, double upper) {
     const int lambda = 4 * N;
@@ -80,6 +104,8 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
 
         bool stop = false;
         while (eval_count < budget && !stop) {
+            // TODO: stop
+
             iter += 1;
             hist_head += 1;
             hist_head %= history_size;
@@ -93,7 +119,11 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
                 }
             }
 
-            // TODO: evaluate m, evaluate and sort the population, and other stuff here
+            eval_count += lambda + 1;
+            double m_eval = 0; /* TODO */
+            double pop_eval[lambda]; /* TODO */
+
+            sort_population(lambda, N, population, pop_eval);
             
             float s[N];
             for (int n = 0; n < N; ++n) {
