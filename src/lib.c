@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <math.h>
 
 void bounce_back_boundary(int N, double array[N], double lower, double upper) {
@@ -21,7 +22,8 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
     const int lambda = 4 * N;
     const int budget = 10000 * N;
     const int history_size = ceil(3 * sqrt(N)) + 6;
-    const double scaling_factor = 1; // Ft
+    const double scaling_factor = 1; // Ft in code, F in paper
+    const double epsilon = 0.000001;
     int eval_count = 0;
     int restart_number = -1;
 
@@ -73,11 +75,55 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
         */
         // and other vars
 
+        float prev_delta[N];
+        for (int n = 0; n < N; ++n) { prev_delta[n] = 0; }
+
         bool stop = false;
         while (eval_count < budget && !stop) {
             iter += 1;
             hist_head += 1;
             hist_head %= history_size;
+
+            float m[N];
+            for (int n = 0; n < N; ++n) {
+                m[n] = 0;
+                for (int l = 0; l < lambda; ++l) {
+                    // TODO: The paper actually has all the weights equal?!
+                    m[n] += population[l][n] * weights_pop[n];
+                }
+            }
+
+            // TODO: evaluate m, evaluate and sort the population, and other stuff here
+            
+            float s[N];
+            for (int n = 0; n < N; ++n) {
+                s[n] = 0;
+                for (int m = 0; m < mu; ++m) {
+                    // TODO: The paper actually has all the weights equal?!
+                    s[n] += population[m][n] * weights[n];
+                }
+            }
+
+            float delta[N];
+            float c = 0.777; // TODO: What even is c? (Maybe we should inline it, if we know what is it)
+            for (int n = 0; n < N; ++n) {
+                delta[n] = (1 - c) * prev_delta[n] + c * (s[n] - m[n]);
+            }
+
+            for (int l = 0; l < lambda; ++l) {
+                int h_max = iter >= history_size ? history_size : hist_head;
+                int h = rand() % h_max;
+                int j = rand() % mu;
+                int k = rand() % mu;
+
+                for (int n = 0; n < N; ++n) {
+                    float d = scaling_factor * (history[h][j][n] - history[h][k][n]) + /* TODO: the noise */ 0;
+                    population[l][n] = s[n] + d + /* TODO: the noise */ 0;
+                }
+            }
+
+            memcpy(history[hist_head], population, sizeof(history[hist_head]));
+            memcpy(prev_delta, delta, sizeof(prev_delta));
         }
     }
 }
