@@ -41,6 +41,17 @@ void sort_population(int lambda, int N, double population[lambda][N], double eva
     }
 }
 
+double approx_normal(double mean, double variance_squared) {
+    // https://stats.stackexchange.com/a/16411
+
+    double ret = 0;
+    for (int i = 0; i < 12; ++i) {
+        ret += (double)rand() / RAND_MAX - 6;
+    }
+
+    return variance_squared * ret + mean;
+}
+
 // TODO: Maybe lower and upper should be arrays of size N
 void des(int N, double initial_point[N], double function(float[N]), double lower, double upper) {
     const int lambda = 4 * N;
@@ -48,6 +59,7 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
     const int history_size = ceil(3 * sqrt(N)) + 6;
     const double scaling_factor = 1; // Ft in code, F in paper
     const double epsilon = 0.000001;
+    const double gamma = 0; // TODO: Actually it's some kind of norm
     int eval_count = 0;
     int restart_number = -1;
 
@@ -147,8 +159,8 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
                 int k = rand() % mu;
 
                 for (int n = 0; n < N; ++n) {
-                    float d = scaling_factor * (history[h][j][n] - history[h][k][n]) + /* TODO: the noise */ 0;
-                    population[l][n] = s[n] + d + /* TODO: the noise */ 0;
+                    float d = scaling_factor * (history[h][j][n] - history[h][k][n]) + delta[n] * gamma * approx_normal(0, 1);
+                    population[l][n] = s[n] + d + epsilon * approx_normal(0, 1);
                 }
             }
 
