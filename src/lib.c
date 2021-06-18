@@ -25,26 +25,6 @@ void deleteInfsNaNs(int N, double x[N]) {
     }
 }
 
-// fitness function from article
-void fitness_population(int N, int m, double population[m][N], double lower[N], double upper[N], double q_max, double population_fitness[m]) {
-    for(int i = 0; i < m; ++i)
-    {
-        double sum = 0.0;
-        for(int j = 0; j < N; ++j)
-        {
-            if(population[i][j] > upper[j])
-            {
-                sum += pow(population[i][j] - upper[j], 2);
-            }
-            else if (population[i][j] < lower[j])
-            {
-                sum += pow(lower[j] - population[i][j], 2);
-            }
-        }
-        population_fitness[i] = sum + q_max;
-    }
-}
-
 // fn_ takes fn objective function :: [numeric] -> numeric passed as argument
 double fn_(int N, double x[N], double lower[N], double upper[N], int *counteval, double (*fn)(int, double*)){
     bool all_in_limits = true;
@@ -64,8 +44,7 @@ double fn_(int N, double x[N], double lower[N], double upper[N], int *counteval,
 }
 
 // Fitness function wrapper for Lamarcian approach
-double* fitness_Lamarcian(int N, int m, double population[m][N], double lower[N], double upper[N], int* counteval, int budget, double (*fn)(int, double*)) {
-    double results[m];
+void fitness_Lamarcian(int N, int m, double population[m][N], double lower[N], double upper[N], int* counteval, int budget, double (*fn)(int, double*), double results[m]) {
     // More than one individual
     if(m > 1){ 
         if(*counteval + m <= budget){
@@ -95,14 +74,12 @@ double* fitness_Lamarcian(int N, int m, double population[m][N], double lower[N]
             results[0] = DBL_MAX;
         }
     }
-    return results;
 }
 
 // Fitness function wrapper for nonLamarcian approach 
 // TODO - When population is no a matrix? Only in first approach?
-double* fitness_non_Lamarcian(int N, int m, double population[m][N], double population_repaired[m][N], double fitness[m], double worst_fit) {
+void fitness_non_Lamarcian(int N, int m, double population[m][N], double population_repaired[m][N], double fitness[m], double worst_fit, double population_fit[m]) {
     
-    double population_fit[m];
     for(int i = 0; i < m; ++i) {
         deleteInfsNaNs(N, population[i]);
         deleteInfsNaNs(N, population_repaired[i]);
@@ -160,9 +137,40 @@ double* fitness_non_Lamarcian(int N, int m, double population[m][N], double popu
     for(int i = 0; i < m; ++i) {
         population_fit[i] = isnan(population_fit[i]) ? DBL_MAX : population_fit[i];
     }
-    return population_fit;
 }
 
+// fitness function from article
+void fitness_function(int N, int M, double array_to_fit[M][N], double lower[N], double upper[N], double q_max, double population_fitness[M]) {
+    for(int i = 0; i < M; ++i)
+    {
+        double sum = 0.0;
+        for(int j = 0; j < N; ++j)
+        {
+            if(array_to_fit[i][j] > upper[j])
+            {
+                sum += pow(array_to_fit[i][j] - upper[j], 2);
+            }
+            else if (array_to_fit[i][j] < lower[j])
+            {
+                sum += pow(lower[j] - array_to_fit[i][j], 2);
+            }
+        }
+        population_fitness[i] = sum + q_max;
+    }
+}
+
+void get_max_value_and_index(int M, double array[M], double *max_value, int *index_of_max)
+{
+    *max_value = DBL_MIN;
+    for(int i = 0; i < M; ++i)
+    {
+        if(*max_value < array[i])
+        {
+            *max_value = array[i];
+            *index_of_max = i;
+        }
+    }
+}
 
 
 
@@ -203,7 +211,7 @@ double approx_normal(double mean, double variance_squared) {
 }
 
 // TODO: Maybe lower and upper should be arrays of size N
-void des(int N, double initial_point[N], double function(float[N]), double lower, double upper) {
+void des(int N, double initial_point[N], double function_fn(int N, double[N]), double lower, double upper) {
     const int lambda = 4 * N;
     const int budget = 10000 * N;
     const int history_size = ceil(3 * sqrt(N)) + 6;
@@ -212,10 +220,21 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
     const double gamma = 0; // TODO: Actually it's some kind of norm
     int eval_count = 0;
     int restart_number = -1;
+    double lower_bound[N];
+    double upper_bound[N];
+  
+    double best_fit = DBL_MIN; // TODO: start value?
+    double best_solution[N];
+    
+    for(int i = 0; i < N; ++i)
+    {
+        lower_bound[i] = lower;
+        upper_bound[i] = upper;
+    }
 
     while (eval_count < budget) {
         restart_number += 1;
-
+        
         int mu = lambda / 2;
 
         double weights[mu];
@@ -247,7 +266,7 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
             }
         }
 
-        double cum_mean = (lower + upper) / 2;
+        // double cum_mean = (lower + upper) / 2;
 
         // TODO: these:
         /*
@@ -261,6 +280,14 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
         */
         // and other vars
 
+        double initial_fitness[lambda];
+        fitness_Lamarcian(N, lambda, population, lower_bound, upper_bound, &eval_count, budget, function_fn, initial_fitness);
+        int max_fit_index = 0;
+        double max_fit_value = DBL_MIN;
+        get_max_value_and_index(lambda, initial_fitness, &max_fit_value, &max_fit_index);
+
+        double worst_fit = max_fit_value; 
+
         float prev_delta[N];
         for (int n = 0; n < N; ++n) { prev_delta[n] = 0; }
 
@@ -271,8 +298,9 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
             iter += 1;
             hist_head += 1;
             hist_head %= history_size;
+            eval_count += lambda + 1;
 
-            float m[N];
+            double m[N];
             for (int n = 0; n < N; ++n) {
                 m[n] = 0;
                 for (int l = 0; l < lambda; ++l) {
@@ -281,9 +309,25 @@ void des(int N, double initial_point[N], double function(float[N]), double lower
                 }
             }
 
-            eval_count += lambda + 1;
-            double m_eval = 0; /* TODO */
-            double pop_eval[lambda]; /* TODO */
+            double m_eval[lambda];
+            fitness_function(N, 1, &m, lower_bound, upper_bound, worst_fit, m_eval);
+
+            double pop_eval[lambda]; 
+            fitness_function(N, 1, population, lower_bound, upper_bound, worst_fit, pop_eval);
+
+            // Find new minimum
+            for(int i = 0; i < lambda; ++i)
+            {
+                if(pop_eval[i] < best_fit)
+                {
+                    best_fit = pop_eval[i];
+                    memcpy(best_solution, population[lambda], sizeof(best_solution));
+                }
+                else if(pop_eval[i] > best_fit)
+                {
+                    worst_fit = pop_eval[i];
+                }
+            }
 
             sort_population(lambda, N, population, pop_eval);
             
