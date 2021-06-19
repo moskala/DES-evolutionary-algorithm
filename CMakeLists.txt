@@ -12,7 +12,7 @@ target_include_directories(lib
 )
 
 add_executable(bin bin/main.c)
-target_link_libraries(bin lib)
+target_link_libraries(bin lib m)
 
 target_compile_options(lib PRIVATE
     $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<C_COMPILER_ID:GNU>>:

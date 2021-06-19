@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include <stdio.h>
 
 void bounce_back_boundary(int N, double array[N], double lower[N], double upper[N]) {
     for (int i = 0; i < N; ++i) {
@@ -241,9 +242,12 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
     const double tol = 10E-12;
     int eval_count = 0;
     int restart_number = -1;
+    double prev_solution;
+    double prev_fitness;
   
     double best_fit = DBL_MIN; // TODO: start value?
     double *best_solution = calloc(N, sizeof(double));
+     
 
     while (eval_count < budget) {
         restart_number += 1;
@@ -265,7 +269,6 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
         for (int i = 0; i < lambda; ++i) {
             weights_pop[i] /= weights_pop_sum;
         }
-
         int hist_head = -1;
         int iter = 0;
         double history[history_size][mu][N];
@@ -276,7 +279,6 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 population[i][j] = 0.8 * ((double)rand() / RAND_MAX * (upper[i] - lower[i]) + lower[i]); // TODO: ??? 0.8
             }
         }
-
         double cum_mean[N];
         for(int i = 0; i < N; ++i)
         {
@@ -302,19 +304,16 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
         // Initial worst fit
         double worst_fit = DBL_MIN;
         get_max_value(lambda, initial_fitness, &worst_fit);
-
         float prev_delta[N];
         for (int n = 0; n < N; ++n) { prev_delta[n] = 0; }
 
         bool stop = false;
         while (eval_count < budget && !stop) {
             // TODO: stop
-
             iter += 1;
             hist_head += 1;
             hist_head %= history_size;
             // eval_count += lambda + 1;
-
             double m[N];
             for (int n = 0; n < N; ++n) {
                 m[n] = 0;
@@ -323,7 +322,6 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                     m[n] += population[l][n] * weights_pop[n];
                 }
             }
-
             // double m_eval[lambda];
             // fitness_function(N, 1, &m, lower, upper, worst_fit, m_eval);
             double population_repaired[lambda][N];
@@ -383,10 +381,13 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
             for (int n = 0; n < N; ++n) {
                 delta[n] = (1 - c) * prev_delta[n] + c * (s[n] - m[n]);
             }
+            memcpy(history[hist_head], population, sizeof(history[hist_head]));
+            memcpy(prev_delta, delta, sizeof(prev_delta));
 
             for (int l = 0; l < lambda; ++l) {
+                
                 int h_max = iter >= history_size ? history_size : hist_head;
-                int h = rand() % h_max;
+                int h = h_max == 0 ? 0 : rand() % h_max;
                 int j = rand() % mu;
                 int k = rand() % mu;
 
@@ -396,12 +397,17 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 }
             }
 
-            memcpy(history[hist_head], population, sizeof(history[hist_head]));
-            memcpy(prev_delta, delta, sizeof(prev_delta));
+            if(prev_solution != best_solution[0] || prev_fitness != best_fit)
+            {
+                printf("Result: %f, Fit: %f, Count: %d\n", best_solution[0], best_fit, eval_count );            
+                prev_solution = best_solution[0];
+                prev_fitness = best_fit;
+            }
+
         }
 
 
-        printf("Result: %f, Fit: %f, Count: %d", best_solution[0], best_fit, eval_count );
+       
 
     }
     struct result res;
