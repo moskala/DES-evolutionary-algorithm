@@ -6,12 +6,12 @@
 #include <math.h>
 #include <float.h>
 
-void bounce_back_boundary(int N, double array[N], double lower, double upper) {
+void bounce_back_boundary(int N, double array[N], double lower[N], double upper[N]) {
     for (int i = 0; i < N; ++i) {
-        if (array[i] < lower) {
-            array[i] = lower + fmod(lower - array[i], upper - lower);
-        } else if (array[i] > upper) {
-            array[i] = upper - fmod(array[i] - upper, upper - lower);
+        if (array[i] < lower[i]) {
+            array[i] = lower[i] + fmod(lower[i] - array[i], upper[i] - lower[i]);
+        } else if (array[i] > upper[i]) {
+            array[i] = upper[i] - fmod(array[i] - upper[i], upper[i] - lower[i]);
         }
     }
     // TODO: deleteInfsNaNs ???
@@ -159,7 +159,7 @@ void fitness_function(int N, int M, double array_to_fit[M][N], double lower[N], 
     }
 }
 
-void get_max_value_and_index(int M, double array[M], double *max_value, int *index_of_max)
+void get_max_value(int M, double array[M], double *max_value)
 {
     *max_value = DBL_MIN;
     for(int i = 0; i < M; ++i)
@@ -167,9 +167,25 @@ void get_max_value_and_index(int M, double array[M], double *max_value, int *ind
         if(*max_value < array[i])
         {
             *max_value = array[i];
-            *index_of_max = i;
         }
     }
+}
+
+
+
+int get_best_fitness(int M, double fitness[M], double *best_fit)
+{
+    int index_best = -1;
+    for(int i = 0; i < M; ++i)
+    {
+        if(*best_fit > fitness[i])
+        {
+            *best_fit = fitness[i];
+            index_best = i;
+
+        }
+    }
+    return index_best;
 }
 
 
@@ -199,6 +215,7 @@ void sort_population(int lambda, int N, double population[lambda][N], double eva
     }
 }
 
+
 double approx_normal(double mean, double variance_squared) {
     // https://stats.stackexchange.com/a/16411
 
@@ -211,31 +228,25 @@ double approx_normal(double mean, double variance_squared) {
 }
 
 // TODO: Maybe lower and upper should be arrays of size N
-void des(int N, double initial_point[N], double function_fn(int N, double[N]), double lower, double upper) {
+struct result des(int N, double initial_point[N], double function_fn(int N, double[N]), double lower[N], double upper[N]) {
     const int lambda = 4 * N;
     const int budget = 10000 * N;
     const int history_size = ceil(3 * sqrt(N)) + 6;
     const double scaling_factor = 1; // Ft in code, F in paper
     const double epsilon = 0.000001;
     const double gamma = 0; // TODO: Actually it's some kind of norm
+    const int mu = lambda / 2;
+    const double cc = mu / (mu + 2);
+    const double cp = 1 / sqrt(N);
+    const double tol = 10E-12;
     int eval_count = 0;
     int restart_number = -1;
-    double lower_bound[N];
-    double upper_bound[N];
   
     double best_fit = DBL_MIN; // TODO: start value?
-    double best_solution[N];
-    
-    for(int i = 0; i < N; ++i)
-    {
-        lower_bound[i] = lower;
-        upper_bound[i] = upper;
-    }
+    double *best_solution = calloc(N, sizeof(double));
 
     while (eval_count < budget) {
         restart_number += 1;
-        
-        int mu = lambda / 2;
 
         double weights[mu];
         double weights_sum = 0;
@@ -262,11 +273,16 @@ void des(int N, double initial_point[N], double function_fn(int N, double[N]), d
         double population[lambda][N];
         for (int i = 0; i < lambda; ++i) {
             for (int j = 0; j < N; ++ j) {
-                population[i][j] = 0.8 * ((double)rand() / RAND_MAX * (upper - lower) + lower); // TODO: ??? 0.8
+                population[i][j] = 0.8 * ((double)rand() / RAND_MAX * (upper[i] - lower[i]) + lower[i]); // TODO: ??? 0.8
             }
         }
 
-        // double cum_mean = (lower + upper) / 2;
+        double cum_mean[N];
+        for(int i = 0; i < N; ++i)
+        {
+            cum_mean[i] = (lower[i] + upper[i]) / 2;
+        }
+         
 
         // TODO: these:
         /*
@@ -276,17 +292,16 @@ void des(int N, double initial_point[N], double function_fn(int N, double[N]), d
         oldMean <- numeric(N)
         newMean <- par
         limit <- 0
-        worst.fit <- max(fitness)
         */
         // and other vars
 
+        // Initial fitness
         double initial_fitness[lambda];
-        fitness_Lamarcian(N, lambda, population, lower_bound, upper_bound, &eval_count, budget, function_fn, initial_fitness);
-        int max_fit_index = 0;
-        double max_fit_value = DBL_MIN;
-        get_max_value_and_index(lambda, initial_fitness, &max_fit_value, &max_fit_index);
-
-        double worst_fit = max_fit_value; 
+        fitness_Lamarcian(N, lambda, population, lower, upper, &eval_count, budget, function_fn, initial_fitness);
+        
+        // Initial worst fit
+        double worst_fit = DBL_MIN;
+        get_max_value(lambda, initial_fitness, &worst_fit);
 
         float prev_delta[N];
         for (int n = 0; n < N; ++n) { prev_delta[n] = 0; }
@@ -298,7 +313,7 @@ void des(int N, double initial_point[N], double function_fn(int N, double[N]), d
             iter += 1;
             hist_head += 1;
             hist_head %= history_size;
-            eval_count += lambda + 1;
+            // eval_count += lambda + 1;
 
             double m[N];
             for (int n = 0; n < N; ++n) {
@@ -309,13 +324,22 @@ void des(int N, double initial_point[N], double function_fn(int N, double[N]), d
                 }
             }
 
-            double m_eval[lambda];
-            fitness_function(N, 1, &m, lower_bound, upper_bound, worst_fit, m_eval);
+            // double m_eval[lambda];
+            // fitness_function(N, 1, &m, lower, upper, worst_fit, m_eval);
+            double population_repaired[lambda][N];
+            memcpy(population_repaired, population, sizeof(population_repaired));
+            for(int i = 0; i < lambda; ++i)
+            {
+                bounce_back_boundary(N, population_repaired[i], lower, upper);
+            }
 
             double pop_eval[lambda]; 
-            fitness_function(N, 1, population, lower_bound, upper_bound, worst_fit, pop_eval);
+            double fitness[lambda];
+            fitness_Lamarcian(N, lambda, population, lower, upper, &eval_count, budget, function_fn, fitness);
+            fitness_non_Lamarcian(N, lambda, population, population_repaired, fitness, worst_fit, pop_eval);
 
-            // Find new minimum
+
+            // Find new minimum and maximum
             for(int i = 0; i < lambda; ++i)
             {
                 if(pop_eval[i] < best_fit)
@@ -328,7 +352,6 @@ void des(int N, double initial_point[N], double function_fn(int N, double[N]), d
                     worst_fit = pop_eval[i];
                 }
             }
-
             sort_population(lambda, N, population, pop_eval);
             
             float s[N];
@@ -339,6 +362,21 @@ void des(int N, double initial_point[N], double function_fn(int N, double[N]), d
                     s[n] += population[m][n] * weights[n];
                 }
             }
+
+            // Check if the middle point is the best found so far
+            for(int i = 0; i < N; ++i)
+            {
+                cum_mean[i] = 0.8 * cum_mean[i] + 0.2 * s[i];
+            }
+            bounce_back_boundary(lambda, cum_mean, lower, upper); //TODO czy tablica powinna się zmienić czy zwrócić nową
+            double fitness_cum_mean[1];
+            fitness_Lamarcian(N, 1, &cum_mean, lower, upper, &eval_count, budget, function_fn, fitness_cum_mean);
+            if(fitness_cum_mean[0] < best_fit) {
+                best_fit = fitness_cum_mean[0];
+                memcpy(best_solution, cum_mean, sizeof(best_solution));
+            }
+
+
 
             float delta[N];
             float c = 0.777; // TODO: What even is c? (Maybe we should inline it, if we know what is it)
@@ -361,5 +399,15 @@ void des(int N, double initial_point[N], double function_fn(int N, double[N]), d
             memcpy(history[hist_head], population, sizeof(history[hist_head]));
             memcpy(prev_delta, delta, sizeof(prev_delta));
         }
+
+
+        printf("Result: %f, Fit: %f, Count: %d", best_solution[0], best_fit, eval_count );
+
     }
+    struct result res;
+    res.best_fit = best_fit;
+    res.best_result = best_solution;
+    res.count = eval_count;
+
+    return  res;
 }
