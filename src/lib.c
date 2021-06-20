@@ -8,14 +8,43 @@
 #include <stdio.h>
 
 void bounce_back_boundary(int N, double array[N], double lower[N], double upper[N]) {
-    for (int i = 0; i < N; ++i) {
-        if (array[i] < lower[i]) {
-            array[i] = lower[i] + fmod(lower[i] - array[i], upper[i] - lower[i]);
-        } else if (array[i] > upper[i]) {
-            array[i] = upper[i] - fmod(array[i] - upper[i], upper[i] - lower[i]);
+    bool wasChanged = true;
+    while(wasChanged) {
+        
+        wasChanged = false;
+        for (int i = 0; i < N; ++i) {
+            if (array[i] < lower[i]) {
+                array[i] = lower[i] + fabs(fmod(lower[i] - array[i], upper[i] - lower[i]));
+                
+                wasChanged = true;
+            } else if (array[i] > upper[i]) {
+                array[i] = upper[i] - fabs(fmod(array[i] - upper[i], upper[i] - lower[i]));
+                wasChanged = true;
+            }
         }
+        deleteInfsNaNs(N, array);
     }
-    // TODO: deleteInfsNaNs ???
+}
+
+void print_array(int N, int M, double array[M][N]){
+    for (int i = 0; i < M; ++i)
+    {
+        for (int j = 0; j < N; ++j)
+        {
+            printf("%f, ", array[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void print_array_one_dim(int N, double array[N]){
+
+    for (int j = 0; j < N; ++j)
+    {
+        printf("%f, ", array[j]);
+    }
+    printf("\n");
 }
 
 void deleteInfsNaNs(int N, double x[N]) {
@@ -304,7 +333,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
         // Initial worst fit
         double worst_fit = -HUGE_VAL;
         get_max_value(lambda, initial_fitness, &worst_fit);
-        float prev_delta[N];
+        double prev_delta[N];
         for (int n = 0; n < N; ++n) { prev_delta[n] = 0; }
 
         bool stop = false;
@@ -352,7 +381,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
             }
             sort_population(lambda, N, population, pop_eval);
             
-            float s[N];
+            double s[N];
             for (int n = 0; n < N; ++n) {
                 s[n] = 0;
                 for (int m = 0; m < mu; ++m) {
@@ -366,7 +395,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
             {
                 cum_mean[i] = 0.8 * cum_mean[i] + 0.2 * s[i];
             }
-            bounce_back_boundary(lambda, cum_mean, lower, upper); //TODO czy tablica powinna się zmienić czy zwrócić nową
+            bounce_back_boundary(N, cum_mean, lower, upper); //TODO czy tablica powinna się zmienić czy zwrócić nową
             double fitness_cum_mean[1];
             fitness_Lamarcian(N, 1, &cum_mean, lower, upper, &eval_count, budget, function_fn, fitness_cum_mean);
             if(fitness_cum_mean[0] < best_fit) {
@@ -376,8 +405,8 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
 
 
 
-            float delta[N];
-            float c = 0.777; // TODO: What even is c? (Maybe we should inline it, if we know what is it)
+            double delta[N];
+            double c = 0.777; // TODO: What even is c? (Maybe we should inline it, if we know what is it)
             for (int n = 0; n < N; ++n) {
                 delta[n] = (1 - c) * prev_delta[n] + c * (s[n] - m[n]);
             }
@@ -392,9 +421,14 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 int k = rand() % mu;
 
                 for (int n = 0; n < N; ++n) {
-                    float d = scaling_factor * (history[h][j][n] - history[h][k][n]) + delta[n] * gamma * approx_normal(0, 1);
+                    double d = scaling_factor * (history[h][j][n] - history[h][k][n]) + delta[n] * gamma * approx_normal(0, 1);
                     population[l][n] = s[n] + d + epsilon * approx_normal(0, 1);
                 }
+            }
+
+            for(int i = 0; i < lambda; ++i)
+            {
+                deleteInfsNaNs(N, population[i]);
             }
 
             if(prev_solution != best_solution[0] || prev_fitness != best_fit)
