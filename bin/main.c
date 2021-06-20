@@ -1,11 +1,18 @@
 #include "des.h"
 #include "test_funtions.h"
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 
-// struct result des(int N, double initial_point[N], double function_fn(int N, double[N]), double lower[N], double upper[N])
+
 int main() {
-
-    test_simple_quadratic();
-    test_sin_cos();
-    
+    int seed = time(NULL);
+    int nTimes = 5;
+    test_simple_quadratic(nTimes, seed);
+    test_sin_cos(nTimes, seed);
+    test_Ackeleya(nTimes, seed, 3);
+    test_Rastrigin(nTimes, seed, 5);
+    test_Schubert(nTimes, seed);
+    test_Shekel(nTimes, seed);
 }

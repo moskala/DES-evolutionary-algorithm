@@ -7,25 +7,6 @@
 #include <float.h>
 #include <stdio.h>
 
-void bounce_back_boundary(int N, double array[N], double lower[N], double upper[N]) {
-    bool wasChanged = true;
-    while(wasChanged) {
-        
-        wasChanged = false;
-        for (int i = 0; i < N; ++i) {
-            if (array[i] < lower[i]) {
-                array[i] = lower[i] + fabs(fmod(lower[i] - array[i], upper[i] - lower[i]));
-                
-                wasChanged = true;
-            } else if (array[i] > upper[i]) {
-                array[i] = upper[i] - fabs(fmod(array[i] - upper[i], upper[i] - lower[i]));
-                wasChanged = true;
-            }
-        }
-        deleteInfsNaNs(N, array);
-    }
-}
-
 void print_array(int N, int M, double array[M][N]){
     for (int i = 0; i < M; ++i)
     {
@@ -54,6 +35,26 @@ void deleteInfsNaNs(int N, double x[N]) {
         }
     }
 }
+
+void bounce_back_boundary(int N, double array[N], double lower[N], double upper[N]) {
+    bool wasChanged = true;
+    while(wasChanged) {
+        
+        wasChanged = false;
+        for (int i = 0; i < N; ++i) {
+            if (array[i] < lower[i]) {
+                array[i] = lower[i] + fabs(fmod(lower[i] - array[i], upper[i] - lower[i]));
+                
+                wasChanged = true;
+            } else if (array[i] > upper[i]) {
+                array[i] = upper[i] - fabs(fmod(array[i] - upper[i], upper[i] - lower[i]));
+                wasChanged = true;
+            }
+        }
+        deleteInfsNaNs(N, array);
+    }
+}
+
 
 // fn_ takes fn objective function :: [numeric] -> numeric passed as argument
 double fn_(int N, double x[N], double lower[N], double upper[N], int *counteval, double (*fn)(int, double*)){
@@ -258,20 +259,24 @@ double approx_normal(double mean, double variance_squared) {
 }
 
 // TODO: Maybe lower and upper should be arrays of size N
-struct result des(int N, double initial_point[N], double function_fn(int N, double[N]), double lower[N], double upper[N]) {
+struct result des(int N, double initial_point[N], double function_fn(int N, double[N]), double lower[N], double upper[N], int seed, bool logRes) {
+    srand(seed);
+
     const int lambda = 4 * N;
     const int budget = 10000 * N;
     const int history_size = ceil(3 * sqrt(N)) + 6;
-    const double scaling_factor = 1; // Ft in code, F in paper
-    const double epsilon = 0.000001;
-    const double gamma = 0; // TODO: Actually it's some kind of norm
+    const double scaling_factor = 1 / sqrt(2); // 1 / sqrt(2); // Ft in code, F in paper TODO: was 1
+    const double gamma = approx_normal(0,1); // TODO: Actually it's some kind of norm
+    const double epsilon = 10E-12;
+    
+    double c = 4 / (N + 4);
     const int mu = lambda / 2;
     const double cc = mu / (mu + 2);
     const double cp = 1 / sqrt(N);
     const double tol = 10E-12;
     int eval_count = 0;
     int restart_number = -1;
-    double prev_solution;
+    // double *prev_solution;
     double prev_fitness;
   
     double best_fit = HUGE_VAL;
@@ -338,6 +343,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
 
         bool stop = false;
         while (eval_count < budget && !stop) {
+            // printf("Count: %d\n", eval_count);
             // TODO: stop
             iter += 1;
             hist_head += 1;
@@ -406,12 +412,36 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
 
 
             double delta[N];
-            double c = 0.777; // TODO: What even is c? (Maybe we should inline it, if we know what is it)
-            for (int n = 0; n < N; ++n) {
+            // double dMean[N];
+            // double c = 0.777; // TODO: What even is c? (Maybe we should inline it, if we know what is it)
+            if(hist_head == 0) {
+                for (int n = 0; n < N; ++n) {
+                // Article
                 delta[n] = (1 - c) * prev_delta[n] + c * (s[n] - m[n]);
+
+                // Implementation (1 - cp) * prev_delta[n] / N_sqrt is 0 so we do not need it here
+                // delta[n] =  sqrt( mu * cp * (2-cp)) * (s[n] - m[n]) / scaling_factor;
+                }
             }
+            else {
+
+                for (int n = 0; n < N; ++n) {
+                    // Article
+                    delta[n] = (1 - c) * prev_delta[n] + c * (s[n] - m[n]);
+
+                    //Implementation
+                    // dMean[n] = s[n] - m[n];
+                    // delta[n] = (1 - cp) * prev_delta[n] + sqrt( mu * cp * (2-cp)) * (s[n] - m[n]) / scaling_factor;
+
+                }
+
+            }
+            
             memcpy(history[hist_head], population, sizeof(history[hist_head]));
             memcpy(prev_delta, delta, sizeof(prev_delta));
+
+            
+            
 
             for (int l = 0; l < lambda; ++l) {
                 
@@ -421,8 +451,14 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 int k = rand() % mu;
 
                 for (int n = 0; n < N; ++n) {
+                    // Article
                     double d = scaling_factor * (history[h][j][n] - history[h][k][n]) + delta[n] * gamma * approx_normal(0, 1);
                     population[l][n] = s[n] + d + epsilon * approx_normal(0, 1);
+                    
+                    // Implementation
+                    // double d = sqrt(cc) * ((history[h][j][n] - history[h][k][n]) + approx_normal(0, 1) *  dMean[n]) + delta[n] * sqrt(1-cc) * approx_normal(0, 1);
+                    // population[l][n] = s[n] + scaling_factor * d + tol * pow((1 - 2 / pow(N, 2)), iter / 2) * approx_normal(0, d) / sqrt(N);
+                    
                 }
             }
 
@@ -433,9 +469,10 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
 
             if(prev_fitness != best_fit)
             {
-                printf("Update result:, Fit: %f, Count: %d\n", best_fit, eval_count );   
-                print_array_one_dim(N, best_solution);    
-                // prev_solution = best_solution[0];
+                if(logRes){
+                    printf("Update result:, Fit: %f, Count: %d\n", best_fit, eval_count );   
+                    print_array_one_dim(N, best_solution);  
+                }
                 prev_fitness = best_fit;
             }
 
