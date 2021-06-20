@@ -343,9 +343,9 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 if(pop_eval[i] < best_fit)
                 {
                     best_fit = pop_eval[i];
-                    memcpy(best_solution, population[lambda], N * sizeof(double));
+                    memcpy(best_solution, population_repaired[i], N * sizeof(double));
                 }
-                else if(pop_eval[i] > best_fit)
+                else if(pop_eval[i] > worst_fit)
                 {
                     worst_fit = pop_eval[i];
                 }
