@@ -46,10 +46,10 @@ double fun_Ackleya(int n, double *x)
 
 double fun_Rastrigin(int n, double *x)
 {
-    double sum = 0.0;
+    double sum = 10.0 * n;
     for(int i = 0; i < n; ++i)
     {
-        sum += pow(x[i], 2) - cos(18*x[i]);
+        sum += pow(x[i], 2) - 10 * cos(2 * M_PI * x[i]);
     }
     return sum;
 }

@@ -127,7 +127,7 @@ void test_Ackeleya(int nTimes, int seed, int dim){
 
 }
 
-// Minimum for x = 0, f(x) = -n
+// Minimum for x = 0, f(x) = 0
 void test_Rastrigin(int nTimes, int seed, int dim){
     char *name = "Test Rastrigin";
     int N = dim;
@@ -135,11 +135,11 @@ void test_Rastrigin(int nTimes, int seed, int dim){
     double upper[N];
     for(int i = 0; i < N; ++i)
     {
-        lower[i] = -1;
-        upper[i] = 1;
+        lower[i] = -5.12;
+        upper[i] = 5.12;
 
     }
-    double expected_value = -N;
+    double expected_value = 0;
     // test_function(name, nTimes, seed, expected_value, N, fun_Rastrigin, lower, upper, false);
     test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Rastrigin, lower, upper);
 
