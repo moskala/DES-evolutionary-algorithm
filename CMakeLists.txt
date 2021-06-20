@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(DES-evolutionary-algorithm LANGUAGES C)
 
-add_library(lib src/lib.c)
+add_library(lib src/lib.c src/tests.c src/functions.c) 
 target_include_directories(lib
     PUBLIC 
         $<INSTALL_INTERFACE:include>
@@ -13,6 +13,12 @@ target_include_directories(lib
 
 add_executable(bin bin/main.c)
 target_link_libraries(bin lib)
+
+# From https://hsf-training.github.io/hsf-training-cmake-webpage/aio/index.html
+find_library(MATH_LIBRARY m)
+if(MATH_LIBRARY)
+    target_link_libraries(bin ${MATH_LIBRARY})
+endif()
 
 target_compile_options(lib PRIVATE
     $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<C_COMPILER_ID:GNU>>:
