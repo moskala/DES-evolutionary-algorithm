@@ -246,6 +246,21 @@ void sort_population(int lambda, int N, double population[lambda][N], double eva
     }
 }
 
+bool stop_criterion(int N, int lambda, double population[lambda][N], double population_midpoint[N], int epsilon){
+    double sum = 0.0;
+    for(int j = 0; j < N; ++j)
+    {
+        double sum_sigma = 0.0;
+        for(int i = 0; i < lambda; ++i)
+        {
+            sum_sigma += pow(population[i][j] - population_midpoint[j], 2);
+        }
+        sum_sigma = 1 / (lambda - 1);
+        sum += sqrt(sum_sigma);
+    }
+    return (sum / N) < epsilon;
+}
+
 
 double approx_normal(double mean, double variance_squared) {
     // https://stats.stackexchange.com/a/16411
@@ -281,6 +296,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
   
     double best_fit = HUGE_VAL;
     double *best_solution = calloc(N, sizeof(double));
+    double prev_s[N];
      
 
     while (eval_count < budget) {
@@ -395,6 +411,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                     s[n] += population[m][n] * weights[n];
                 }
             }
+            memcpy(prev_s, s, N * sizeof(double));
 
             // Check if the middle point is the best found so far
             for(int i = 0; i < N; ++i)
@@ -475,6 +492,13 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 }
                 prev_fitness = best_fit;
             }
+
+            if(iter > 0)
+            {
+                stop = stop_criterion(N, lambda, population, prev_s, epsilon);
+            }
+
+            
 
         }
 
