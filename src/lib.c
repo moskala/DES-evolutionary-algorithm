@@ -497,14 +497,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
             {
                 stop = stop_criterion(N, lambda, population, prev_s, epsilon);
             }
-
-            
-
         }
-
-
-       
-
     }
     struct result res;
     res.best_fit = best_fit;

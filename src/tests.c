@@ -29,6 +29,61 @@ void test_function(char *testName, int nTimes, int seed, double expectedValue, i
     }
 }
 
+int compare( const void* a, const void* b)
+{
+     double d_a = * ( (double*) a );
+     double d_b = * ( (double*) b );
+
+     if ( d_a == d_b ) return 0;
+     else if ( d_a < d_b ) return -1;
+     else return 1;
+}
+
+
+
+void test_function_with_statistics(char *test_name, int n_times, int seed, double expected_value, int N, double function_fn(int N, double[N]), double lower[N], double upper[N]){
+    int current_seed = seed;
+    
+    double results[n_times];
+
+    for(int i = 0; i < n_times; ++i){
+        struct result res = des(N, NULL, function_fn, lower, upper, current_seed, false);
+        results[i] = fabs(res.best_fit - expected_value);
+        current_seed *= 2;
+    }
+    qsort(results, n_times, sizeof(double), compare);
+    double best = results[0];
+    double worst = results[n_times-1];
+    double median;
+    double mean = 0.0;
+    double std = 0.0;
+    if(n_times % 2 == 0) 
+    {
+        int index_1 = n_times / 2 - 1;
+        int index_2 = index_1 + 1;
+        median = (results[index_1] + results[index_2]) / 2;
+    }
+    else 
+    {
+        median = results[(n_times + 1) / 2 - 1];
+    }
+    for(int i = 0; i < n_times; ++i)
+    {
+        mean += results[i];
+    }
+    mean /= (double)n_times;
+
+    for(int i = 0; i < n_times; ++i)
+    {
+        std += pow(results[i] - mean, 2.0);
+    }
+    std /= n_times;
+    std = sqrt(std);
+    printf("Stats for %s\n", test_name);
+    printf("best: %f, worst: %f, mean: %f, median: %f, std: %f\n", best, worst, mean, median, std);
+
+}
+
 
 void test_simple_quadratic(int nTimes, int seed) {
     char *name = "Test simple quandric";
@@ -36,7 +91,10 @@ void test_simple_quadratic(int nTimes, int seed) {
     double init_point[N];
     double lower[1] = {-5};
     double upper[1] = {5};
-    test_function(name, nTimes, seed, -9.0, 1, fun_simple_quadratic, lower, upper, false);
+    double expected_value = -9.0;
+    // test_function(name, nTimes, seed, -9.0, 1, fun_simple_quadratic, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_simple_quadratic, lower, upper);
+
 }
 
 void test_sin_cos(int nTimes, int seed) {
@@ -46,7 +104,9 @@ void test_sin_cos(int nTimes, int seed) {
     double lower[2] = {-5, -5};
     double upper[2] = {5, 5};
     double expected_value = -1;
-    test_function(name, nTimes, seed, expected_value, 2, fun_sin_cos, lower, upper, false);
+    // test_function(name, nTimes, seed, expected_value, 2, fun_sin_cos, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_sin_cos, lower, upper);
+
 }
 
 // Minimum for x = 0, f(x) = 0
@@ -62,7 +122,9 @@ void test_Ackeleya(int nTimes, int seed, int dim){
 
     }
     double expected_value = 0;
-    test_function(name, nTimes, seed, expected_value, N, fun_Ackleya, lower, upper, false);
+    // test_function(name, nTimes, seed, expected_value, N, fun_Ackleya, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Ackleya, lower, upper);
+
 }
 
 // Minimum for x = 0, f(x) = -n
@@ -78,7 +140,9 @@ void test_Rastrigin(int nTimes, int seed, int dim){
 
     }
     double expected_value = -N;
-    test_function(name, nTimes, seed, expected_value, N, fun_Rastrigin, lower, upper, false);
+    // test_function(name, nTimes, seed, expected_value, N, fun_Rastrigin, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Rastrigin, lower, upper);
+
 }
 
 // Minimum f(x) = 186.73 for 760 different xs
@@ -94,7 +158,8 @@ void test_Schubert(int nTimes, int seed){
 
     }
     double expected_value = -186.7309;
-    test_function(name, nTimes, seed, expected_value, N, fun_Schubert, lower, upper, false);
+    // test_function(name, nTimes, seed, expected_value, N, fun_Schubert, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Schubert, lower, upper);
 }
 
 // x = (4,4,4,4) f(x) = -10.5364
@@ -110,5 +175,6 @@ void test_Shekel(int nTimes, int seed){
 
     }
     double expected_value = -10.5364;
-    test_function(name, nTimes, seed, expected_value, N, fun_Shekel, lower, upper, false);
+    // test_function(name, nTimes, seed, expected_value, N, fun_Shekel, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Shekel, lower, upper);
 }

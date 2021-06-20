@@ -2,6 +2,9 @@
 #include <stdbool.h>
 
 void test_function(char *testName, int nTimes, int seed, double expectedValue, int N, double function_fn(int N, double[N]), double lower[N], double upper[N], bool logDes);
+void test_function_with_statistics(char *test_name, int n_times, int seed, double expected_value, int N, double function_fn(int N, double[N]), double lower[N], double upper[N]);
+
+
 
 double fun_sin_cos(int n, double* v);
 void test_simple_quadratic(int nTimes, int seed);
