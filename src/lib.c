@@ -245,7 +245,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
     double prev_solution;
     double prev_fitness;
   
-    double best_fit = DBL_MIN; // TODO: start value?
+    double best_fit = HUGE_VAL;
     double *best_solution = calloc(N, sizeof(double));
      
 
@@ -302,7 +302,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
         fitness_Lamarcian(N, lambda, population, lower, upper, &eval_count, budget, function_fn, initial_fitness);
         
         // Initial worst fit
-        double worst_fit = DBL_MIN;
+        double worst_fit = -HUGE_VAL;
         get_max_value(lambda, initial_fitness, &worst_fit);
         float prev_delta[N];
         for (int n = 0; n < N; ++n) { prev_delta[n] = 0; }
