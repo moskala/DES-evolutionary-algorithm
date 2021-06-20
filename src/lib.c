@@ -343,7 +343,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 if(pop_eval[i] < best_fit)
                 {
                     best_fit = pop_eval[i];
-                    memcpy(best_solution, population[lambda], sizeof(best_solution));
+                    memcpy(best_solution, population[lambda], N * sizeof(double));
                 }
                 else if(pop_eval[i] > best_fit)
                 {
@@ -371,7 +371,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
             fitness_Lamarcian(N, 1, &cum_mean, lower, upper, &eval_count, budget, function_fn, fitness_cum_mean);
             if(fitness_cum_mean[0] < best_fit) {
                 best_fit = fitness_cum_mean[0];
-                memcpy(best_solution, cum_mean, sizeof(best_solution));
+                memcpy(best_solution, cum_mean, N * sizeof(double));
             }
 
 
