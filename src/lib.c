@@ -431,10 +431,11 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 deleteInfsNaNs(N, population[i]);
             }
 
-            if(prev_solution != best_solution[0] || prev_fitness != best_fit)
+            if(prev_fitness != best_fit)
             {
-                printf("Result: %f, Fit: %f, Count: %d\n", best_solution[0], best_fit, eval_count );            
-                prev_solution = best_solution[0];
+                printf("Update result:, Fit: %f, Count: %d\n", best_fit, eval_count );   
+                print_array_one_dim(N, best_solution);    
+                // prev_solution = best_solution[0];
                 prev_fitness = best_fit;
             }
 

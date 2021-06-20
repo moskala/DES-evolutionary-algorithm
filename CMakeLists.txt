@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(DES-evolutionary-algorithm LANGUAGES C)
 
-add_library(lib src/lib.c src/tests.c) 
+add_library(lib src/lib.c src/tests.c src/functions.c) 
 target_include_directories(lib
     PUBLIC 
         $<INSTALL_INTERFACE:include>
