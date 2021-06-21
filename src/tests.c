@@ -1,6 +1,7 @@
 #include "test_funtions.h"
 #include "des.h"
 #include <stdio.h>
+#include <time.h>
 
 
 void print_result(int N, struct result res) {
@@ -45,10 +46,15 @@ void test_function_with_statistics(char *test_name, int n_times, int seed, doubl
     int current_seed = seed;
     
     double results[n_times];
+    double times[n_times];
 
     for(int i = 0; i < n_times; ++i){
+        clock_t pre = clock();
         struct result res = des(N, NULL, function_fn, lower, upper, current_seed, false);
+        clock_t post = clock();
+        double time = (post - pre) / ((double)CLOCKS_PER_SEC / 1000);
         results[i] = fabs(res.best_fit - expected_value);
+        times[i] = time;
         current_seed *= 2;
         free(res.best_result);
     }
@@ -83,6 +89,35 @@ void test_function_with_statistics(char *test_name, int n_times, int seed, doubl
     printf("Stats for %s\n", test_name);
     printf("best: %f, worst: %f, mean: %f, median: %f, std: %f\n", best, worst, mean, median, std);
 
+    qsort(times, n_times, sizeof(double), compare);
+    best = times[0];
+    worst = times[n_times-1];
+    mean = 0.0;
+    std = 0.0;
+    if(n_times % 2 == 0) 
+    {
+        int index_1 = n_times / 2 - 1;
+        int index_2 = index_1 + 1;
+        median = (times[index_1] + times[index_2]) / 2;
+    }
+    else 
+    {
+        median = times[(n_times + 1) / 2 - 1];
+    }
+    for(int i = 0; i < n_times; ++i)
+    {
+        mean += times[i];
+    }
+    mean /= (double)n_times;
+
+    for(int i = 0; i < n_times; ++i)
+    {
+        std += pow(times[i] - mean, 2.0);
+    }
+    std /= n_times;
+    std = sqrt(std);
+    printf("Timings for %s\n", test_name);
+    printf("best: %.1f ms, worst: %.1f ms, mean: %.1f ms, median: %.1f ms, std: %.1f ms\n", best, worst, mean, median, std);
 }
 
 
@@ -248,4 +283,3 @@ void test_Zakharov(int nTimes, int seed, int dim){
     // test_function(name, nTimes, seed, expected_value, N, fun_Zakharov, lower, upper, false);
     test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Zakharov, lower, upper);
 }
-
