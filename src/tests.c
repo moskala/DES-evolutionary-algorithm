@@ -50,6 +50,7 @@ void test_function_with_statistics(char *test_name, int n_times, int seed, doubl
         struct result res = des(N, NULL, function_fn, lower, upper, current_seed, false);
         results[i] = fabs(res.best_fit - expected_value);
         current_seed *= 2;
+        free(res.best_result);
     }
     qsort(results, n_times, sizeof(double), compare);
     double best = results[0];

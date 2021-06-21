@@ -229,7 +229,7 @@ void sort_population(int lambda, int N, double population[lambda][N], double eva
     // TODO: Consider using a better sort (but qsort doesn't work well here -.-)
 
     for (int end = lambda; end > 0; --end) {
-        for (int i = 0; i < end; ++i) {
+        for (int i = 0; i + 1 < end; ++i) {
             double tmp_pop[N];
             double tmp_eval;
 
@@ -292,7 +292,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
     int eval_count = 0;
     int restart_number = -1;
     // double *prev_solution;
-    double prev_fitness;
+    double prev_fitness = NAN;
   
     double best_fit = HUGE_VAL;
     double *best_solution = calloc(N, sizeof(double));
@@ -326,7 +326,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
         double population[lambda][N];
         for (int i = 0; i < lambda; ++i) {
             for (int j = 0; j < N; ++ j) {
-                population[i][j] = 0.8 * ((double)rand() / RAND_MAX * (upper[i] - lower[i]) + lower[i]); // TODO: ??? 0.8
+                population[i][j] = 0.8 * ((double)rand() / RAND_MAX * (upper[j] - lower[j]) + lower[j]); // TODO: ??? 0.8
             }
         }
         double cum_mean[N];
@@ -408,7 +408,7 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
                 s[n] = 0;
                 for (int m = 0; m < mu; ++m) {
                     // TODO: The paper actually has all the weights equal?!
-                    s[n] += population[m][n] * weights[n];
+                    s[n] += population[m][n] * weights[m];
                 }
             }
             memcpy(prev_s, s, N * sizeof(double));
