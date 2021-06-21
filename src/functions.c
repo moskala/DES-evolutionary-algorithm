@@ -99,3 +99,68 @@ double fun_Shekel(int n, double *x)
     }
     return (-1) * sum;
 }
+
+
+double fun_Griewank(int n, double *x)
+{
+    double sum = 0.0;
+    double prod = 1.0;
+    for(int i = 0; i < n; ++i)
+    {
+        sum += pow(x[i], 2.0) / 4000;
+        prod *= cos(x[i] / sqrt(i+1));
+    }
+    return sum - prod + 1;
+}
+
+double fun_Perm(int n, double *x)
+{
+    double sum = 0.0;
+    double beta = 10;
+    for(int i = 1; i < n+1; ++i)
+    {
+        double inner_sum = 0.0;
+        for(int j  = 1; j < n+1; ++j)
+        {     
+            inner_sum += (j + beta) * (pow(x[j-1], i) - pow(j, (-1)*i));
+        }
+        sum += pow(inner_sum, 2.0);
+    }
+    return sum;
+}
+
+
+double fun_rotated(int n, double *x)
+{
+    double sum = 0.0;
+    for(int i = 0; i < n; ++i)
+    {
+        double inner_sum = 0.0;
+        for(int j  = 0; j < i; ++j)
+        {     
+            inner_sum += pow(x[j], 2);
+        }
+        sum += inner_sum;
+    }
+    return sum;
+}
+
+double fun_Zakharov(int n, double *x)
+{
+    double sum1 = 0.0;
+    double sum2 = 0.0;
+    for(int i = 0; i < n; ++i)
+    {
+        sum1 += pow(x[i], 2.0);
+        sum2 += 0.5 * (i + 1) * x[i];
+    }
+    return sum1 + pow(sum2, 2.0) + pow(sum2, 4.0);
+}
+
+
+
+
+
+
+
+

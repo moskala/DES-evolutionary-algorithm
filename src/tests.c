@@ -179,3 +179,73 @@ void test_Shekel(int nTimes, int seed){
     // test_function(name, nTimes, seed, expected_value, N, fun_Shekel, lower, upper, false);
     test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Shekel, lower, upper);
 }
+
+// Minimum for x* = 0, f(x) = 0
+void test_Griewank(int nTimes, int seed, int dim){
+    char *name = "Test Griewank";
+    int N = dim;
+    double lower[N];
+    double upper[N];
+    for(int i = 0; i < N; ++i)
+    {
+        lower[i] = -600;
+        upper[i] = 600;
+
+    }
+    double expected_value = 0;
+    // test_function(name, nTimes, seed, expected_value, N, fun_Griewank, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Griewank, lower, upper);
+
+}
+
+// Perm Function 0, d, β
+void test_Perm(int nTimes, int seed, int dim){
+    char *name = "Test Perm";
+    int N = dim;
+    double lower[N];
+    double upper[N];
+    for(int i = 0; i < N; ++i)
+    {
+        lower[i] = -N;
+        upper[i] = N;
+
+    }
+    double expected_value = 0;
+    // test_function(name, nTimes, seed, expected_value, N, fun_Perm, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Perm, lower, upper);
+}
+
+
+void test_rotated(int nTimes, int seed, int dim){
+    char *name = "Test rotated";
+    int N = dim;
+    double lower[N];
+    double upper[N];
+    for(int i = 0; i < N; ++i)
+    {
+        lower[i] = -65.536;
+        upper[i] =  65.536;
+
+    }
+    double expected_value = 0;
+    // test_function(name, nTimes, seed, expected_value, N, fun_rotated, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_rotated, lower, upper);
+}
+
+
+void test_Zakharov(int nTimes, int seed, int dim){
+    char *name = "Test Zakharov";
+    int N = dim;
+    double lower[N];
+    double upper[N];
+    for(int i = 0; i < N; ++i)
+    {
+        lower[i] = -5;
+        upper[i] =  10;
+
+    }
+    double expected_value = 0;
+    // test_function(name, nTimes, seed, expected_value, N, fun_Zakharov, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Zakharov, lower, upper);
+}
+
