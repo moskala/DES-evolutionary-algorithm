@@ -25,3 +25,17 @@ void test_Schubert(int nTimes, int seed);
 
 double fun_Shekel(int n, double *x);
 void test_Shekel(int nTimes, int seed);
+
+
+double fun_Griewank(int n, double *x);
+void test_Griewank(int nTimes, int seed, int dim);
+
+double fun_Perm(int n, double *x);
+void test_Perm(int nTimes, int seed, int dim);
+
+double fun_rotated(int n, double *x);
+void test_rotated(int nTimes, int seed, int dim);
+
+double fun_Zakharov(int n, double *x);
+void test_Zakharov(int nTimes, int seed, int dim);
+
