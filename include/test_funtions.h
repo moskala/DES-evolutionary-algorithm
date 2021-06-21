@@ -20,8 +20,8 @@ double fun_Rastrigin(int n, double *x);
 void test_Rastrigin(int nTimes, int seed, int dim);
 
 
-double fun_Schubert(int n, double *x);
-void test_Schubert(int nTimes, int seed);
+double fun_Shubert(int n, double *x);
+void test_Shubert(int nTimes, int seed);
 
 double fun_Shekel(int n, double *x);
 void test_Shekel(int nTimes, int seed);

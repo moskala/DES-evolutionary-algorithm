@@ -182,8 +182,8 @@ void test_Rastrigin(int nTimes, int seed, int dim){
 }
 
 // Minimum f(x) = 186.73 for 760 different xs
-void test_Schubert(int nTimes, int seed){
-    char *name = "Test Schubert";
+void test_Shubert(int nTimes, int seed){
+    char *name = "Test Shubert";
     int N = 2;
     double lower[N];
     double upper[N];
@@ -194,8 +194,8 @@ void test_Schubert(int nTimes, int seed){
 
     }
     double expected_value = -186.7309;
-    // test_function(name, nTimes, seed, expected_value, N, fun_Schubert, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Schubert, lower, upper);
+    // test_function(name, nTimes, seed, expected_value, N, fun_Shubert, lower, upper, false);
+    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Shubert, lower, upper);
 }
 
 // x = (4,4,4,4) f(x) = -10.5364
