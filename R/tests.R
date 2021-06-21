@@ -11,24 +11,37 @@ library(data.table)
 
 
 test <- function(func, expected_value, n_times, test_name, filename){
+  errors <- c()
+  time_values <- c()
   for(val in 1:n_times) {
     start.time <- Sys.time()
     res <- func();
     end.time <- Sys.time()
     time.taken <- end.time - start.time
     value <- res$value;
-    error = abs(value - expected_value);
-    line = c(test_name, expected_value, value, error, time.taken);
-    fwrite(as.data.table(t(as.matrix(line))), file = filename, append=TRUE, sep = ";")
+    errors <- append(errors, abs(value - expected_value));
+    time_values <- append(time_values, as.numeric(time.taken));
   }
+  best_error <- min(errors);
+  worst_error <- max(errors);
+  mean_error <- mean(errors);
+  median_error <- median(errors);
+  std_error <- sd(errors);
+  
+  best_time <- min(time_values);
+  worst_time <- max(time_values);
+  mean_time <- mean(time_values);
+  median_time <- median(time_values);
+  std_time <- sd(time_values);
+  
+  line_error = c(test_name, "error", best_error, worst_error, mean_error, median_error, std_error);
+  fwrite(as.data.table(t(as.matrix(line_error))), file = filename, append=TRUE, sep = ";")
+  line_time = c(test_name, "time", best_time, worst_time, mean_time, median_time, std_time);
+  fwrite(as.data.table(t(as.matrix(line_time))), file = filename, append=TRUE, sep = ";")
 }
 
 # Ackley Function min = 0; x* = 0
-des_ackeley <- function() {
-  s <- sample(-30:30, N, replace=TRUE);
-  print(s);
-  return(des(s, ackley, lower=-30, upper=30))
-}
+des_ackeley <- function() {return(des(sample(-30:30, N, replace=TRUE), ackley, lower=-30, upper=30))}
 
 # Shubert Function min = -186.7309
 des_schubert <- function() {return(des(sample(-10:10, 2, replace=TRUE), shubert, lower=-10, upper=10))}

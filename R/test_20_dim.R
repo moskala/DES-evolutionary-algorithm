@@ -3,7 +3,7 @@ source("tests.R")
 N <- 20
 test_count <- 10
 test_filename <- "tests_R_results_20_dim.txt"
-fwrite(t(c("name", "expected_value", "res_value", "error", "time")), col.names = FALSE, file = test_filename, sep = ";")
+fwrite(t(c("name", "value", "best", "worst", "mean", "median", "std")), col.names = FALSE, file = test_filename, sep = ";")
 seed_value <- 1234
 set.seed(seed_value)
 
