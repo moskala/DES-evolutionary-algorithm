@@ -274,7 +274,7 @@ double approx_normal(double mean, double variance_squared) {
 }
 
 // TODO: Maybe lower and upper should be arrays of size N
-struct result des(int N, double initial_point[N], double function_fn(int N, double[N]), double lower[N], double upper[N], int seed, bool logRes) {
+struct result des(int N, double function_fn(int N, double[N]), double lower[N], double upper[N], int seed, bool logRes) {
     srand(seed);
 
     const int lambda = 4 * N;
@@ -284,11 +284,8 @@ struct result des(int N, double initial_point[N], double function_fn(int N, doub
     const double gamma = approx_normal(0,1); // TODO: Actually it's some kind of norm
     const double epsilon = 10E-12;
     
-    double c = 4 / (N + 4);
+    double c = (double)4 / (N + 4); // ?????
     const int mu = lambda / 2;
-    const double cc = mu / (mu + 2);
-    const double cp = 1 / sqrt(N);
-    const double tol = 10E-12;
     int eval_count = 0;
     int restart_number = -1;
     // double *prev_solution;

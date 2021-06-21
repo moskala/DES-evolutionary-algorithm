@@ -1,8 +1,9 @@
 #include "test_funtions.h"
 #include "des.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
-
+#include <math.h>
 
 void print_result(int N, struct result res) {
     printf("Result - Fit: %f, Count: %d\n", res.best_fit, res.count);
@@ -15,7 +16,7 @@ void print_result(int N, struct result res) {
     printf("\n");
 }
 
-void print_result_and_expected(int N, struct result res, double expectedValue) {
+void print_result_and_expected(struct result res, double expectedValue) {
     printf("Result - Fit: %f, Expected: %f\n", res.best_fit, expectedValue);
 }
 
@@ -23,9 +24,9 @@ void test_function(char *testName, int nTimes, int seed, double expectedValue, i
     printf("Test: %s\n", testName);
     int current_seed = seed;
     for(int i = 0; i < nTimes; ++i){
-        struct result res = des(N, NULL, function_fn, lower, upper, current_seed, logDesResults);
+        struct result res = des(N, function_fn, lower, upper, current_seed, logDesResults);
         printf("Test %d / %d\n", i+1, nTimes);
-        print_result_and_expected(N, res, expectedValue);
+        print_result_and_expected(res, expectedValue);
         current_seed *= 2;
     }
 }
@@ -50,7 +51,7 @@ void test_function_with_statistics(char *test_name, int n_times, int seed, doubl
 
     for(int i = 0; i < n_times; ++i){
         clock_t pre = clock();
-        struct result res = des(N, NULL, function_fn, lower, upper, current_seed, false);
+        struct result res = des(N, function_fn, lower, upper, current_seed, false);
         clock_t post = clock();
         double time = (post - pre) / ((double)CLOCKS_PER_SEC / 1000);
         results[i] = fabs(res.best_fit - expected_value);
@@ -124,7 +125,6 @@ void test_function_with_statistics(char *test_name, int n_times, int seed, doubl
 void test_simple_quadratic(int nTimes, int seed) {
     char *name = "Test simple quandric";
     int N = 1;
-    double init_point[N];
     double lower[1] = {-5};
     double upper[1] = {5};
     double expected_value = -9.0;
@@ -136,7 +136,6 @@ void test_simple_quadratic(int nTimes, int seed) {
 void test_sin_cos(int nTimes, int seed) {
     char *name = "Test sin*cos";
     int N = 2;
-    double init_point[N];
     double lower[2] = {-5, -5};
     double upper[2] = {5, 5};
     double expected_value = -1;
