@@ -30,7 +30,7 @@ void print_array_one_dim(int N, double array[N]){
 
 void deleteInfsNaNs(int N, double x[N]) {
     for(int i = 0 ; i < N; ++i){
-        if(isnan(x[i])){
+        if(isnan(x[i]) || isinf(x[i])){
             x[i] = DBL_MAX;
         }
     }
@@ -43,11 +43,10 @@ void bounce_back_boundary(int N, double array[N], double lower[N], double upper[
         wasChanged = false;
         for (int i = 0; i < N; ++i) {
             if (array[i] < lower[i]) {
-                array[i] = lower[i] + fabs(fmod(lower[i] - array[i], upper[i] - lower[i]));
-                
+                array[i] = lower[i] + fmod(fabs(lower[i] - array[i]), upper[i] - lower[i]);
                 wasChanged = true;
             } else if (array[i] > upper[i]) {
-                array[i] = upper[i] - fabs(fmod(array[i] - upper[i], upper[i] - lower[i]));
+                array[i] = upper[i] - fmod(fabs(array[i] - upper[i]), upper[i] - lower[i]);
                 wasChanged = true;
             }
         }
@@ -129,7 +128,7 @@ void fitness_non_Lamarcian(int N, int m, double population[m][N], double populat
                     all_different = false;
                     break;
                 }
-                col_sum += pow(population[i][j] - population_repaired[i][j], 2);
+                col_sum += pow(population[i][j] - population_repaired[i][j], 2.0);
             }
             // repairedInd <- apply(P != P_repaired, 2, all)
             repaired_ind[i] = all_different;
@@ -165,9 +164,7 @@ void fitness_non_Lamarcian(int N, int m, double population[m][N], double populat
         }
     }
     // P_fit <- deleteInfsNaNs(P_fit)
-    for(int i = 0; i < m; ++i) {
-        population_fit[i] = isnan(population_fit[i]) ? DBL_MAX : population_fit[i];
-    }
+    deleteInfsNaNs(m, population_fit);
 }
 
 // fitness function from article
