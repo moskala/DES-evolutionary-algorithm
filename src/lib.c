@@ -252,10 +252,14 @@ bool stop_criterion(int N, int lambda, double population[lambda][N], double popu
         {
             sum_sigma += pow(population[i][j] - population_midpoint[j], 2);
         }
-        sum_sigma = 1 / (lambda - 1);
+        sum_sigma = sum_sigma / (lambda - 1) ;
         sum += sqrt(sum_sigma);
     }
-    return (sum / N) < epsilon;
+    bool result = (sum / N) < epsilon;
+    if(result) {
+        printf("Stop reached!\n");
+    }
+    return result;
 }
 
 
@@ -292,9 +296,9 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
     const int history_size = ceil(3 * sqrt(N)) + 6;
     const double scaling_factor = 1 / sqrt(2); // 1 / sqrt(2); // Ft in code, F in paper TODO: was 1
     const double gamma = approx_delta(N);
-    const double epsilon = 10E-12;
+    const double epsilon = 10E-8 / gamma;
     
-    double c = (double)4 / (N + 4); // ?????
+    double c = (double)4 / (N + 4); 
     const int mu = lambda / 2;
     int eval_count = 0;
     int restart_number = -1;
@@ -341,18 +345,7 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
         {
             cum_mean[i] = (lower[i] + upper[i]) / 2;
         }
-         
 
-        // TODO: these:
-        /*
-        selection <- rep(0, mu)
-        selectedPoints <- matrix(0, nrow = N, ncol = mu)
-        fitness <- fn_l(population)
-        oldMean <- numeric(N)
-        newMean <- par
-        limit <- 0
-        */
-        // and other vars
 
         // Initial fitness
         double initial_fitness[lambda];
