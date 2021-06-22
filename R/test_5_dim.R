@@ -1,7 +1,7 @@
 source("tests.R")
 
 N <- 5
-test_count <- 10
+test_count <- 20
 test_filename <- "results/tests_R_results_5_dim.txt"
 fwrite(t(c("name", "value", "best", "worst", "mean", "median", "std")), col.names = FALSE, file = test_filename, sep = ";")
 seed_value <- 1234

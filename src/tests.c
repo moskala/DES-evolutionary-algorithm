@@ -88,7 +88,7 @@ void test_function_with_statistics(FILE *error_file, FILE *times_file,
     }
     std /= n_times;
     std = sqrt(std);
-    fprintf(error_file, "%s;%d;%f;%f;%f;%f;%f\n", test_name, N, best, worst, mean, median, std);
+    fprintf(error_file, "%s;%d;%.3e;%.3e;%.3e;%.3e;%.3e\n", test_name, N, best, worst, mean, median, std);
 
     qsort(times, n_times, sizeof(double), compare);
     best = times[0];
