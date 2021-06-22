@@ -10,14 +10,15 @@ int main() {
     // int seed = time(NULL);
     int seed = 1234;
     int n_times = 20;
-    test_simple_quadratic(n_times, seed);
-    test_sin_cos(n_times, seed);
-    test_Ackeleya(n_times, seed, 5);
-    test_Rastrigin(n_times, seed, 5);
+    int dim = 3;
+    // test_simple_quadratic(n_times, seed);
+    // test_sin_cos(n_times, seed);
+    test_Ackeleya(n_times, seed, dim);
+    test_Rastrigin(n_times, seed, dim);
     test_Shubert(n_times, seed);
     test_Shekel(n_times, seed);
-    test_Griewank(n_times, seed, 5);
-    test_Perm(n_times, seed, 5);
-    test_rotated(n_times, seed, 5);
-    test_Zakharov(n_times, seed, 5);
+    test_Griewank(n_times, seed, dim);
+    test_Perm(n_times, seed, dim);
+    test_rotated(n_times, seed, dim);
+    test_Zakharov(n_times, seed, dim);
 }
