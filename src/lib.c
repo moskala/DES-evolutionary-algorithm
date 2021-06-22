@@ -270,6 +270,19 @@ double approx_normal(double mean, double variance_squared) {
     return variance_squared * ret + mean;
 }
 
+double approx_delta(int N) {
+    const int ITER = 1000;
+    double ret = 0;
+    for (int i = 0; i < ITER; ++i) {
+        double ret1 = 0;
+        for (int n = 0; n < N; ++n) {
+            ret1 += pow(approx_normal(0, 1), 2);
+        }
+        ret += sqrt(ret1) / ITER;
+    }
+    return 1 / ret;
+}
+
 // TODO: Maybe lower and upper should be arrays of size N
 struct result des(int N, double function_fn(int N, double[N]), double lower[N], double upper[N], int seed, bool logRes) {
     srand(seed);
@@ -278,7 +291,7 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
     const int budget = 10000 * N;
     const int history_size = ceil(3 * sqrt(N)) + 6;
     const double scaling_factor = 1 / sqrt(2); // 1 / sqrt(2); // Ft in code, F in paper TODO: was 1
-    const double gamma = approx_normal(0,1); // TODO: Actually it's some kind of norm
+    const double gamma = approx_delta(N);
     const double epsilon = 10E-12;
     
     double c = (double)4 / (N + 4); // ?????
