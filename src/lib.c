@@ -367,8 +367,16 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
                     m[n] += population[l][n] * weights_pop[n];
                 }
             }
-            // double m_eval[lambda];
-            // fitness_function(N, 1, &m, lower, upper, worst_fit, m_eval);
+
+            double m_eval[1];
+            fitness_Lamarcian(N, 1, &m, lower, upper, &eval_count, budget, function_fn, m_eval);
+            fitness_non_Lamarcian(N, 1, &m, &m_eval, m_eval, worst_fit, m_eval);
+
+            if(m_eval[0] < best_fit) {
+                best_fit = m_eval[0];
+                memcpy(best_solution, m, N * sizeof(double));
+            }
+
             double population_repaired[lambda][N];
             memcpy(population_repaired, population, sizeof(population_repaired));
             for(int i = 0; i < lambda; ++i)

@@ -122,7 +122,7 @@ double fun_Perm(int n, double *x)
         double inner_sum = 0.0;
         for(int j  = 1; j < n+1; ++j)
         {     
-            inner_sum += (j + beta) * (pow(x[j-1], i) - pow(j, (-1)*i));
+            inner_sum += (j + beta) * (pow(x[j-1], i) - pow(1.0 / j, i));
         }
         sum += pow(inner_sum, 2.0);
     }
