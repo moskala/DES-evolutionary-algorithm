@@ -55,7 +55,7 @@ double fun_Rastrigin(int n, double *x)
 }
 
 
-double fun_Schubert(int n, double *x)
+double fun_Shubert(int n, double *x)
 {
     if(n != 2)
     {

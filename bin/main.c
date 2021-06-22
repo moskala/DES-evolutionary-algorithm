@@ -13,6 +13,6 @@ int main() {
     test_sin_cos(nTimes, seed);
     test_Ackeleya(nTimes, seed, 1);
     test_Rastrigin(nTimes, seed, 5);
-    test_Schubert(nTimes, seed);
+    test_Shubert(nTimes, seed);
     test_Shekel(nTimes, seed);
 }
