@@ -43,7 +43,8 @@ int compare( const void* a, const void* b)
 
 
 
-void test_function_with_statistics(char *test_name, int n_times, int seed, double expected_value, int N, double function_fn(int N, double[N]), double lower[N], double upper[N]){
+void test_function_with_statistics(FILE *error_file, FILE *times_file,
+        char *test_name, int n_times, int seed, double expected_value, int N, double function_fn(int N, double[N]), double lower[N], double upper[N]) {
     int current_seed = seed;
     
     double results[n_times];
@@ -87,8 +88,7 @@ void test_function_with_statistics(char *test_name, int n_times, int seed, doubl
     }
     std /= n_times;
     std = sqrt(std);
-    printf("Stats for %s\n", test_name);
-    printf("best: %f, worst: %f, mean: %f, median: %f, std: %f\n", best, worst, mean, median, std);
+    fprintf(error_file, "%s;%d;%f;%f;%f;%f;%f\n", test_name, N, best, worst, mean, median, std);
 
     qsort(times, n_times, sizeof(double), compare);
     best = times[0];
@@ -117,35 +117,34 @@ void test_function_with_statistics(char *test_name, int n_times, int seed, doubl
     }
     std /= n_times;
     std = sqrt(std);
-    printf("Timings for %s\n", test_name);
-    printf("best: %.1f ms, worst: %.1f ms, mean: %.1f ms, median: %.1f ms, std: %.1f ms\n", best, worst, mean, median, std);
+    fprintf(times_file, "%s;%d;%f;%f;%f;%f;%f\n", test_name, N, best, worst, mean, median, std);
 }
 
 
-void test_simple_quadratic(int nTimes, int seed) {
+void test_simple_quadratic(FILE *error_file, FILE *times_file, int nTimes, int seed) {
     char *name = "Test simple quandric";
     int N = 1;
     double lower[1] = {-5};
     double upper[1] = {5};
     double expected_value = -9.0;
     // test_function(name, nTimes, seed, -9.0, 1, fun_simple_quadratic, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_simple_quadratic, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_simple_quadratic, lower, upper);
 
 }
 
-void test_sin_cos(int nTimes, int seed) {
+void test_sin_cos(FILE *error_file, FILE *times_file, int nTimes, int seed) {
     char *name = "Test sin*cos";
     int N = 2;
     double lower[2] = {-5, -5};
     double upper[2] = {5, 5};
     double expected_value = -1;
     // test_function(name, nTimes, seed, expected_value, 2, fun_sin_cos, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_sin_cos, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_sin_cos, lower, upper);
 
 }
 
 // Minimum for x = 0, f(x) = 0
-void test_Ackeleya(int nTimes, int seed, int dim){
+void test_Ackeleya(FILE *error_file, FILE *times_file, int nTimes, int seed, int dim){
     char *name = "Test Ackeley";
     int N = dim;
     double lower[N];
@@ -158,12 +157,12 @@ void test_Ackeleya(int nTimes, int seed, int dim){
     }
     double expected_value = 0;
     // test_function(name, nTimes, seed, expected_value, N, fun_Ackleya, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Ackleya, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_Ackleya, lower, upper);
 
 }
 
 // Minimum for x = 0, f(x) = 0
-void test_Rastrigin(int nTimes, int seed, int dim){
+void test_Rastrigin(FILE *error_file, FILE *times_file, int nTimes, int seed, int dim){
     char *name = "Test Rastrigin";
     int N = dim;
     double lower[N];
@@ -176,12 +175,12 @@ void test_Rastrigin(int nTimes, int seed, int dim){
     }
     double expected_value = 0;
     // test_function(name, nTimes, seed, expected_value, N, fun_Rastrigin, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Rastrigin, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_Rastrigin, lower, upper);
 
 }
 
 // Minimum f(x) = 186.73 for 760 different xs
-void test_Shubert(int nTimes, int seed){
+void test_Shubert(FILE *error_file, FILE *times_file, int nTimes, int seed){
     char *name = "Test Shubert";
     int N = 2;
     double lower[N];
@@ -194,11 +193,11 @@ void test_Shubert(int nTimes, int seed){
     }
     double expected_value = -186.7309;
     // test_function(name, nTimes, seed, expected_value, N, fun_Shubert, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Shubert, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_Shubert, lower, upper);
 }
 
 // x = (4,4,4,4) f(x) = -10.5364
-void test_Shekel(int nTimes, int seed){
+void test_Shekel(FILE *error_file, FILE *times_file, int nTimes, int seed){
     char *name = "Test Shekel";
     int N = 4;
     double lower[N];
@@ -211,11 +210,11 @@ void test_Shekel(int nTimes, int seed){
     }
     double expected_value = -10.5364;
     // test_function(name, nTimes, seed, expected_value, N, fun_Shekel, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Shekel, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_Shekel, lower, upper);
 }
 
 // Minimum for x* = 0, f(x) = 0
-void test_Griewank(int nTimes, int seed, int dim){
+void test_Griewank(FILE *error_file, FILE *times_file, int nTimes, int seed, int dim){
     char *name = "Test Griewank";
     int N = dim;
     double lower[N];
@@ -228,12 +227,12 @@ void test_Griewank(int nTimes, int seed, int dim){
     }
     double expected_value = 0;
     // test_function(name, nTimes, seed, expected_value, N, fun_Griewank, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Griewank, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_Griewank, lower, upper);
 
 }
 
 // Perm Function 0, d, β
-void test_Perm(int nTimes, int seed, int dim){
+void test_Perm(FILE *error_file, FILE *times_file, int nTimes, int seed, int dim){
     char *name = "Test Perm";
     int N = dim;
     double lower[N];
@@ -246,11 +245,11 @@ void test_Perm(int nTimes, int seed, int dim){
     }
     double expected_value = 0;
     // test_function(name, nTimes, seed, expected_value, N, fun_Perm, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Perm, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_Perm, lower, upper);
 }
 
 
-void test_rotated(int nTimes, int seed, int dim){
+void test_rotated(FILE *error_file, FILE *times_file, int nTimes, int seed, int dim){
     char *name = "Test rotated";
     int N = dim;
     double lower[N];
@@ -263,11 +262,11 @@ void test_rotated(int nTimes, int seed, int dim){
     }
     double expected_value = 0;
     // test_function(name, nTimes, seed, expected_value, N, fun_rotated, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_rotated, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_rotated, lower, upper);
 }
 
 
-void test_Zakharov(int nTimes, int seed, int dim){
+void test_Zakharov(FILE *error_file, FILE *times_file, int nTimes, int seed, int dim){
     char *name = "Test Zakharov";
     int N = dim;
     double lower[N];
@@ -280,5 +279,5 @@ void test_Zakharov(int nTimes, int seed, int dim){
     }
     double expected_value = 0;
     // test_function(name, nTimes, seed, expected_value, N, fun_Zakharov, lower, upper, false);
-    test_function_with_statistics(name, nTimes, seed, expected_value, N, fun_Zakharov, lower, upper);
+    test_function_with_statistics(error_file, times_file, name, nTimes, seed, expected_value, N, fun_Zakharov, lower, upper);
 }
