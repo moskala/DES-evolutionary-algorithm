@@ -30,7 +30,7 @@ void print_array_one_dim(int N, double array[N]){
 
 void deleteInfsNaNs(int N, double x[N]) {
     for(int i = 0 ; i < N; ++i){
-        if(isnan(x[i])){
+        if(isnan(x[i]) || isinf(x[i])){
             x[i] = DBL_MAX;
         }
     }
@@ -43,11 +43,10 @@ void bounce_back_boundary(int N, double array[N], double lower[N], double upper[
         wasChanged = false;
         for (int i = 0; i < N; ++i) {
             if (array[i] < lower[i]) {
-                array[i] = lower[i] + fabs(fmod(lower[i] - array[i], upper[i] - lower[i]));
-                
+                array[i] = lower[i] + fmod(fabs(lower[i] - array[i]), upper[i] - lower[i]);
                 wasChanged = true;
             } else if (array[i] > upper[i]) {
-                array[i] = upper[i] - fabs(fmod(array[i] - upper[i], upper[i] - lower[i]));
+                array[i] = upper[i] - fmod(fabs(array[i] - upper[i]), upper[i] - lower[i]);
                 wasChanged = true;
             }
         }
@@ -129,7 +128,7 @@ void fitness_non_Lamarcian(int N, int m, double population[m][N], double populat
                     all_different = false;
                     break;
                 }
-                col_sum += pow(population[i][j] - population_repaired[i][j], 2);
+                col_sum += pow(population[i][j] - population_repaired[i][j], 2.0);
             }
             // repairedInd <- apply(P != P_repaired, 2, all)
             repaired_ind[i] = all_different;
@@ -165,9 +164,7 @@ void fitness_non_Lamarcian(int N, int m, double population[m][N], double populat
         }
     }
     // P_fit <- deleteInfsNaNs(P_fit)
-    for(int i = 0; i < m; ++i) {
-        population_fit[i] = isnan(population_fit[i]) ? DBL_MAX : population_fit[i];
-    }
+    deleteInfsNaNs(m, population_fit);
 }
 
 // fitness function from article
@@ -255,10 +252,11 @@ bool stop_criterion(int N, int lambda, double population[lambda][N], double popu
         {
             sum_sigma += pow(population[i][j] - population_midpoint[j], 2);
         }
-        sum_sigma = 1 / (lambda - 1);
+        sum_sigma = sum_sigma / (lambda - 1) ;
         sum += sqrt(sum_sigma);
     }
-    return (sum / N) < epsilon;
+    bool result = (sum / N) < epsilon;
+    return result;
 }
 
 
@@ -283,7 +281,7 @@ double approx_delta(int N) {
         }
         ret += sqrt(ret1) / ITER;
     }
-    return 1 / ret;
+    return 1.0 / ret;
 }
 
 // TODO: Maybe lower and upper should be arrays of size N
@@ -293,15 +291,14 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
     const int lambda = 4 * N;
     const int budget = 10000 * N;
     const int history_size = ceil(3 * sqrt(N)) + 6;
-    const double scaling_factor = 1 / sqrt(2); // 1 / sqrt(2); // Ft in code, F in paper TODO: was 1
+    const double scaling_factor = (double)1 / sqrt(2); 
     const double gamma = approx_delta(N);
-    const double epsilon = 10E-12;
+    const double epsilon = 10E-8;
     
-    double c = (double)4 / (N + 4); // ?????
+    double c = (double)4 / (N + 4); 
     const int mu = lambda / 2;
     int eval_count = 0;
     int restart_number = -1;
-    // double *prev_solution;
     double prev_fitness = NAN;
   
     double best_fit = HUGE_VAL;
@@ -314,17 +311,18 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
 
         double weights[mu];
         double weights_sum = 0;
+      
         for (int i = 0; i < mu; ++i) {
-            weights_sum += weights[i] = log(mu + 1) - log(i + 1);
+            weights_sum += weights[i] = 1; // log(mu + 1) - log(i + 1);
         }
         for (int i = 0; i < mu; ++i) {
             weights[i] /= weights_sum;
         }
-
+  
         double weights_pop[lambda];
         double weights_pop_sum = 0;
         for (int i = 0; i < lambda; ++i) {
-            weights_pop_sum += weights_pop[i] = log(lambda + 1) - log(i + 1);
+            weights_pop_sum += weights_pop[i] = 1; // log(lambda + 1) - log(i + 1);
         }
         for (int i = 0; i < lambda; ++i) {
             weights_pop[i] /= weights_pop_sum;
@@ -344,18 +342,7 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
         {
             cum_mean[i] = (lower[i] + upper[i]) / 2;
         }
-         
 
-        // TODO: these:
-        /*
-        selection <- rep(0, mu)
-        selectedPoints <- matrix(0, nrow = N, ncol = mu)
-        fitness <- fn_l(population)
-        oldMean <- numeric(N)
-        newMean <- par
-        limit <- 0
-        */
-        // and other vars
 
         // Initial fitness
         double initial_fitness[lambda];
@@ -369,12 +356,9 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
 
         bool stop = false;
         while (eval_count < budget && !stop) {
-            // printf("Count: %d\n", eval_count);
-            // TODO: stop
             iter += 1;
             hist_head += 1;
             hist_head %= history_size;
-            // eval_count += lambda + 1;
             double m[N];
             for (int n = 0; n < N; ++n) {
                 m[n] = 0;
@@ -396,7 +380,6 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
             double fitness[lambda];
             fitness_Lamarcian(N, lambda, population, lower, upper, &eval_count, budget, function_fn, fitness);
             fitness_non_Lamarcian(N, lambda, population, population_repaired, fitness, worst_fit, pop_eval);
-
 
             // Find new minimum and maximum
             for(int i = 0; i < lambda; ++i)
@@ -428,7 +411,7 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
             {
                 cum_mean[i] = 0.8 * cum_mean[i] + 0.2 * s[i];
             }
-            bounce_back_boundary(N, cum_mean, lower, upper); //TODO czy tablica powinna się zmienić czy zwrócić nową
+            bounce_back_boundary(N, cum_mean, lower, upper); 
             double fitness_cum_mean[1];
             fitness_Lamarcian(N, 1, &cum_mean, lower, upper, &eval_count, budget, function_fn, fitness_cum_mean);
             if(fitness_cum_mean[0] < best_fit) {
@@ -436,39 +419,13 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
                 memcpy(best_solution, cum_mean, N * sizeof(double));
             }
 
-
-
             double delta[N];
-            // double dMean[N];
-            // double c = 0.777; // TODO: What even is c? (Maybe we should inline it, if we know what is it)
-            if(hist_head == 0) {
-                for (int n = 0; n < N; ++n) {
-                // Article
+            for (int n = 0; n < N; ++n) {
                 delta[n] = (1 - c) * prev_delta[n] + c * (s[n] - m[n]);
-
-                // Implementation (1 - cp) * prev_delta[n] / N_sqrt is 0 so we do not need it here
-                // delta[n] =  sqrt( mu * cp * (2-cp)) * (s[n] - m[n]) / scaling_factor;
-                }
-            }
-            else {
-
-                for (int n = 0; n < N; ++n) {
-                    // Article
-                    delta[n] = (1 - c) * prev_delta[n] + c * (s[n] - m[n]);
-
-                    //Implementation
-                    // dMean[n] = s[n] - m[n];
-                    // delta[n] = (1 - cp) * prev_delta[n] + sqrt( mu * cp * (2-cp)) * (s[n] - m[n]) / scaling_factor;
-
-                }
-
             }
             
             memcpy(history[hist_head], population, sizeof(history[hist_head]));
-            memcpy(prev_delta, delta, sizeof(prev_delta));
-
-            
-            
+            memcpy(prev_delta, delta, sizeof(prev_delta));            
 
             for (int l = 0; l < lambda; ++l) {
                 
@@ -478,14 +435,8 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
                 int k = rand() % mu;
 
                 for (int n = 0; n < N; ++n) {
-                    // Article
                     double d = scaling_factor * (history[h][j][n] - history[h][k][n]) + delta[n] * gamma * approx_normal(0, 1);
                     population[l][n] = s[n] + d + epsilon * approx_normal(0, 1);
-                    
-                    // Implementation
-                    // double d = sqrt(cc) * ((history[h][j][n] - history[h][k][n]) + approx_normal(0, 1) *  dMean[n]) + delta[n] * sqrt(1-cc) * approx_normal(0, 1);
-                    // population[l][n] = s[n] + scaling_factor * d + tol * pow((1 - 2 / pow(N, 2)), iter / 2) * approx_normal(0, d) / sqrt(N);
-                    
                 }
             }
 
@@ -506,6 +457,9 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
             if(iter > 0)
             {
                 stop = stop_criterion(N, lambda, population, prev_s, epsilon);
+                if(stop && logRes) {
+                    printf("Stop reached!\n");
+                }
             }
         }
     }

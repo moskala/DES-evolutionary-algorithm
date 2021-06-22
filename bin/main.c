@@ -7,12 +7,18 @@
 
 
 int main() {
-    int seed = time(NULL);
-    int nTimes = 20;
-    test_simple_quadratic(nTimes, seed);
-    test_sin_cos(nTimes, seed);
-    test_Ackeleya(nTimes, seed, 1);
-    test_Rastrigin(nTimes, seed, 5);
-    test_Shubert(nTimes, seed);
-    test_Shekel(nTimes, seed);
+    // int seed = time(NULL);
+    int seed = 1234;
+    int n_times = 20;
+    int dim = 3;
+    // test_simple_quadratic(n_times, seed);
+    // test_sin_cos(n_times, seed);
+    test_Ackeleya(n_times, seed, dim);
+    test_Rastrigin(n_times, seed, dim);
+    test_Shubert(n_times, seed);
+    test_Shekel(n_times, seed);
+    test_Griewank(n_times, seed, dim);
+    test_Perm(n_times, seed, dim);
+    test_rotated(n_times, seed, dim);
+    test_Zakharov(n_times, seed, dim);
 }

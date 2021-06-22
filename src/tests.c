@@ -91,34 +91,34 @@ void test_function_with_statistics(char *test_name, int n_times, int seed, doubl
     printf("best: %f, worst: %f, mean: %f, median: %f, std: %f\n", best, worst, mean, median, std);
 
     qsort(times, n_times, sizeof(double), compare);
-    best = times[0];
-    worst = times[n_times-1];
-    mean = 0.0;
-    std = 0.0;
-    if(n_times % 2 == 0) 
-    {
-        int index_1 = n_times / 2 - 1;
-        int index_2 = index_1 + 1;
-        median = (times[index_1] + times[index_2]) / 2;
-    }
-    else 
-    {
-        median = times[(n_times + 1) / 2 - 1];
-    }
-    for(int i = 0; i < n_times; ++i)
-    {
-        mean += times[i];
-    }
-    mean /= (double)n_times;
+    // best = times[0];
+    // worst = times[n_times-1];
+    // mean = 0.0;
+    // std = 0.0;
+    // if(n_times % 2 == 0) 
+    // {
+    //     int index_1 = n_times / 2 - 1;
+    //     int index_2 = index_1 + 1;
+    //     median = (times[index_1] + times[index_2]) / 2;
+    // }
+    // else 
+    // {
+    //     median = times[(n_times + 1) / 2 - 1];
+    // }
+    // for(int i = 0; i < n_times; ++i)
+    // {
+    //     mean += times[i];
+    // }
+    // mean /= (double)n_times;
 
-    for(int i = 0; i < n_times; ++i)
-    {
-        std += pow(times[i] - mean, 2.0);
-    }
-    std /= n_times;
-    std = sqrt(std);
-    printf("Timings for %s\n", test_name);
-    printf("best: %.1f ms, worst: %.1f ms, mean: %.1f ms, median: %.1f ms, std: %.1f ms\n", best, worst, mean, median, std);
+    // for(int i = 0; i < n_times; ++i)
+    // {
+    //     std += pow(times[i] - mean, 2.0);
+    // }
+    // std /= n_times;
+    // std = sqrt(std);
+    // printf("Timings for %s\n", test_name);
+    // printf("best: %.1f ms, worst: %.1f ms, mean: %.1f ms, median: %.1f ms, std: %.1f ms\n", best, worst, mean, median, std);
 }
 
 
