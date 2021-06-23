@@ -88,6 +88,4 @@ int main() {
     test_dim10(seed, n_times);
     printf("Testing dim 20...\n"); 
     test_dim20(seed, n_times);
-
-    
 }

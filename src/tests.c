@@ -117,7 +117,8 @@ void test_function_with_statistics(FILE *error_file, FILE *times_file,
     }
     std /= n_times;
     std = sqrt(std);
-    fprintf(times_file, "%s;%d;%f;%f;%f;%f;%f\n", test_name, N, best, worst, mean, median, std);
+    double mili = 0.001;
+    fprintf(times_file, "%s;%d;%f;%f;%f;%f;%f\n", test_name, N, best*mili, worst*mili, mean*mili, median*mili, std*mili);
 }
 
 
