@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(DES-evolutionary-algorithm LANGUAGES C)
 
-add_library(lib src/lib.c src/tests.c src/functions.c) 
+add_library(lib src/lib.c) 
 target_include_directories(lib
     PUBLIC 
         $<INSTALL_INTERFACE:include>
@@ -11,7 +11,7 @@ target_include_directories(lib
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-add_executable(bin bin/main.c)
+add_executable(bin bin/main.c bin/tests.c bin/functions.c)
 target_link_libraries(bin lib)
 
 # From https://hsf-training.github.io/hsf-training-cmake-webpage/aio/index.html
