@@ -1,11 +1,34 @@
 #include "des.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
+
+uint64_t xorshift64(uint64_t *seed) {
+    /* NB: This is the XorShift64* random number generator. The code is taken
+     * from https://github.com/jj1bdx/xorshiftplus-c/blob/master/xorshift64star.c
+     * with slight modifications. The original code is in public domain.
+     *
+     * We use this instead of rand(), because it makes code faster (about -40%
+     * on my machine), is more reproductible across compilers and allows us to
+     * stop relying on (s)rand. The generated number quality is irrelevant for
+     * our needs. */
+    *seed ^= *seed >> 12;
+    *seed ^= *seed << 25;
+    *seed ^= *seed >> 27;
+    return *seed * UINT64_C(2685821657736338717);
+}
+
+double xorshift64_zero_one(uint64_t *seed) {
+    /* NB: This removes some precision from the value. This is because the standard
+     * double-precision floating-point number can only hold 53 bits of precision.
+     * Of course, this is not a problem at all. */
+    return (double)xorshift64(seed) / (double)UINT64_MAX;
+}
 
 void print_array(int N, int M, double array[M][N]){
     for (int i = 0; i < M; ++i)
@@ -260,24 +283,24 @@ bool stop_criterion(int N, int lambda, double population[lambda][N], double popu
 }
 
 
-double approx_normal(double mean, double variance_squared) {
+double approx_normal(double mean, double variance_squared, uint64_t *seed) {
     // https://stats.stackexchange.com/a/16411
 
     double ret = 0;
     for (int i = 0; i < 12; ++i) {
-        ret += (double)rand() / RAND_MAX - 6;
+        ret += xorshift64_zero_one(seed) - 6;
     }
 
     return variance_squared * ret + mean;
 }
 
-double approx_delta(int N) {
+double approx_delta(int N, uint64_t *seed) {
     const int ITER = 1000;
     double ret = 0;
     for (int i = 0; i < ITER; ++i) {
         double ret1 = 0;
         for (int n = 0; n < N; ++n) {
-            ret1 += pow(approx_normal(0, 1), 2);
+            ret1 += pow(approx_normal(0, 1, seed), 2);
         }
         ret += sqrt(ret1) / ITER;
     }
@@ -285,14 +308,12 @@ double approx_delta(int N) {
 }
 
 // TODO: Maybe lower and upper should be arrays of size N
-struct result des(int N, double function_fn(int N, double[N]), double lower[N], double upper[N], int seed, bool logRes) {
-    srand(seed);
-
+struct result des(int N, double function_fn(int N, double[N]), double lower[N], double upper[N], uint64_t seed, bool logRes) {
     const int lambda = 4 * N;
     const int budget = 10000 * N;
     const int history_size = ceil(3 * sqrt(N)) + 6;
     const double scaling_factor = (double)1 / sqrt(2); 
-    const double gamma = approx_delta(N);
+    const double gamma = approx_delta(N, &seed);
     const double epsilon = 10E-8;
     
     double c = (double)4 / (N + 4); 
@@ -334,7 +355,7 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
         double population[lambda][N];
         for (int i = 0; i < lambda; ++i) {
             for (int j = 0; j < N; ++ j) {
-                population[i][j] = 0.8 * ((double)rand() / RAND_MAX * (upper[j] - lower[j]) + lower[j]); // TODO: ??? 0.8
+                population[i][j] = 0.8 * (xorshift64_zero_one(&seed) * (upper[j] - lower[j]) + lower[j]); // TODO: ??? 0.8
             }
         }
         double cum_mean[N];
@@ -438,13 +459,13 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
             for (int l = 0; l < lambda; ++l) {
                 
                 int h_max = iter >= history_size ? history_size : hist_head;
-                int h = h_max == 0 ? 0 : rand() % h_max;
-                int j = rand() % mu;
-                int k = rand() % mu;
+                int h = h_max == 0 ? 0 : xorshift64(&seed) % h_max;
+                int j = xorshift64(&seed) % mu;
+                int k = xorshift64(&seed) % mu;
 
                 for (int n = 0; n < N; ++n) {
-                    double d = scaling_factor * (history[h][j][n] - history[h][k][n]) + delta[n] * gamma * approx_normal(0, 1);
-                    population[l][n] = s[n] + d + epsilon * approx_normal(0, 1);
+                    double d = scaling_factor * (history[h][j][n] - history[h][k][n]) + delta[n] * gamma * approx_normal(0, 1, &seed);
+                    population[l][n] = s[n] + d + epsilon * approx_normal(0, 1, &seed);
                 }
             }
 
