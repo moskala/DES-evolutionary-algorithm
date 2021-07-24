@@ -1,18 +1,17 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include "des.h"
 #include "test_funtions.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-
-
-void test_dim5(int seed, int n_times) {
-
+void test_dim5(int seed, int n_times)
+{
     int dim = 5;
 
-    FILE *error_file = fopen("error_dim5.txt", "w");
+    FILE* error_file = fopen("error_dim5.txt", "w");
     fprintf(error_file, "Name;N;Best;Worst;Mean;Median;Standard Deviation\n");
-    FILE *times_file = fopen("times_dim5.txt", "w");
+    FILE* times_file = fopen("times_dim5.txt", "w");
     fprintf(times_file, "Name;N;Best;Worst;Mean;Median;Standard Deviation\n");
 
     test_Ackeleya(error_file, times_file, n_times, seed, dim);
@@ -30,13 +29,13 @@ void test_dim5(int seed, int n_times) {
     fclose(times_file);
 }
 
-void test_dim10(int seed, int n_times) {
-
+void test_dim10(int seed, int n_times)
+{
     int dim = 10;
 
-    FILE *error_file = fopen("error_dim10.txt", "w");
+    FILE* error_file = fopen("error_dim10.txt", "w");
     fprintf(error_file, "Name;N;Best;Worst;Mean;Median;Standard Deviation\n");
-    FILE *times_file = fopen("times_dim10.txt", "w");
+    FILE* times_file = fopen("times_dim10.txt", "w");
     fprintf(times_file, "Name;N;Best;Worst;Mean;Median;Standard Deviation\n");
 
     test_Ackeleya(error_file, times_file, n_times, seed, dim);
@@ -54,13 +53,13 @@ void test_dim10(int seed, int n_times) {
     fclose(times_file);
 }
 
-void test_dim20(int seed, int n_times) {
-
+void test_dim20(int seed, int n_times)
+{
     int dim = 20;
 
-    FILE *error_file = fopen("error_dim20.txt", "w");
+    FILE* error_file = fopen("error_dim20.txt", "w");
     fprintf(error_file, "Name;N;Best;Worst;Mean;Median;Standard Deviation\n");
-    FILE *times_file = fopen("times_dim20.txt", "w");
+    FILE* times_file = fopen("times_dim20.txt", "w");
     fprintf(times_file, "Name;N;Best;Worst;Mean;Median;Standard Deviation\n");
 
     test_Ackeleya(error_file, times_file, n_times, seed, dim);
@@ -78,14 +77,14 @@ void test_dim20(int seed, int n_times) {
     fclose(times_file);
 }
 
-
-int main() {
+int main()
+{
     int seed = 1234;
     int n_times = 20;
     printf("Testing dim 5...\n");
     test_dim5(seed, n_times);
-    printf("Testing dim 10...\n");  
+    printf("Testing dim 10...\n");
     test_dim10(seed, n_times);
-    printf("Testing dim 20...\n"); 
+    printf("Testing dim 20...\n");
     test_dim20(seed, n_times);
 }
