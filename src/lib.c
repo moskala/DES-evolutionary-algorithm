@@ -130,7 +130,6 @@ void fitness_Lamarcian(int N, int m, double population[m][N], double lower[N], d
 }
 
 // Fitness function wrapper for nonLamarcian approach 
-// TODO - When population is no a matrix? Only in first approach?
 void fitness_non_Lamarcian(int N, int m, double population[m][N], double population_repaired[m][N], double fitness[m], double worst_fit, double population_fit[m]) {
     
     for(int i = 0; i < m; ++i) {
@@ -241,13 +240,7 @@ int get_best_fitness(int M, double fitness[M], double *best_fit)
 
 
 
-// TODO: Maybe lower and upper should be arrays of size N - they should be
 void sort_population(int lambda, int N, double population[lambda][N], double eval[lambda]) {
-    // NB: Just the laziest bubble sort XD
-    // Dr. Kaczmarski would be mad…
-    // It doesn't matter anyway, since population is small.
-    // TODO: Consider using a better sort (but qsort doesn't work well here -.-)
-
     for (int end = lambda; end > 0; --end) {
         for (int i = 0; i + 1 < end; ++i) {
             double tmp_pop[N];
@@ -307,7 +300,6 @@ double approx_delta(int N, uint64_t *seed) {
     return 1.0 / ret;
 }
 
-// TODO: Maybe lower and upper should be arrays of size N
 struct result des(int N, double function_fn(int N, double[N]), double lower[N], double upper[N], uint64_t seed, bool logRes) {
     const int lambda = 4 * N;
     const int budget = 10000 * N;
@@ -355,7 +347,7 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
         double population[lambda][N];
         for (int i = 0; i < lambda; ++i) {
             for (int j = 0; j < N; ++ j) {
-                population[i][j] = 0.8 * (xorshift64_zero_one(&seed) * (upper[j] - lower[j]) + lower[j]); // TODO: ??? 0.8
+                population[i][j] = 0.8 * (xorshift64_zero_one(&seed) * (upper[j] - lower[j]) + lower[j]);
             }
         }
         double cum_mean[N];
@@ -384,7 +376,6 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
             for (int n = 0; n < N; ++n) {
                 m[n] = 0;
                 for (int l = 0; l < lambda; ++l) {
-                    // TODO: The paper actually has all the weights equal?!
                     m[n] += population[l][n] * weights_pop[n];
                 }
             }
@@ -429,7 +420,6 @@ struct result des(int N, double function_fn(int N, double[N]), double lower[N], 
             for (int n = 0; n < N; ++n) {
                 s[n] = 0;
                 for (int m = 0; m < mu; ++m) {
-                    // TODO: The paper actually has all the weights equal?!
                     s[n] += population[m][n] * weights[m];
                 }
             }
