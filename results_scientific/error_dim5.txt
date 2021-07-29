@@ -1,2 +1,0 @@
-Name;N;Best;Worst;Mean;Median;Standard Deviation
-Test Perm;5;2.126e-04;2.742e+05;1.505e+04;8.379e+00;5.964e+04
