@@ -9,5 +9,5 @@ struct result {
     int count;
 };
 
-struct result des(int N, double function_fn(int N, double[N]), double lower[N], double upper[N], uint64_t seed,
+struct result des(int N, double function_fn(int N, double[]), double lower[], double upper[], uint64_t seed,
     bool logRes);

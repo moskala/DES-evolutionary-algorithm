@@ -288,7 +288,8 @@ double approx_delta(int N, uint64_t* seed)
     return 1.0 / ret;
 }
 
-struct result des(int N, double function_fn(int N, double[N]), double lower[N], double upper[N], uint64_t seed,
+// NB: We avoid using the N in [] due to a gcc internal compiler error.
+struct result des(int N, double function_fn(int N, double[]), double lower[], double upper[], uint64_t seed,
     bool logRes)
 {
     const int lambda = 4 * N;
