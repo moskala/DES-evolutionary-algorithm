@@ -79,7 +79,7 @@ void bounce_back_boundary(int N, double array[N], double lower[N], double upper[
 }
 
 // fn_ takes fn objective function :: [numeric] -> numeric passed as argument
-double fn_(int N, double x[N], double lower[N], double upper[N], int* counteval, double (*fn)(int, double*))
+double fn_(int N, double x[N], double lower[N], double upper[N], int* counteval, double (*fn)(int, double[N]))
 {
     bool all_in_limits = true;
     for (int i = 0; i < N; i++) {
@@ -98,7 +98,7 @@ double fn_(int N, double x[N], double lower[N], double upper[N], int* counteval,
 
 // Fitness function wrapper for Lamarcian approach
 void fitness_Lamarcian(int N, int m, double population[m][N], double lower[N], double upper[N], int* counteval,
-    int budget, double (*fn)(int, double*), double results[m])
+    int budget, double (*fn)(int, double[N]), double results[m])
 {
     // More than one individual
     if (m > 1) {
