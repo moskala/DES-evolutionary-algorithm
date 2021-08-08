@@ -100,7 +100,6 @@ double fn_(int N, double x[N], double lower[N], double upper[N], int* counteval,
 void fitness_Lamarcian(int N, int m, double population[m][N], double lower[N], double upper[N], int* counteval,
     int budget, double (*fn)(int, double[N]), double results[m])
 {
-    // More than one individual
     if (m > 1) {
         if (*counteval + m <= budget) {
             for (int i = 0; i < m; ++i) {
@@ -119,7 +118,6 @@ void fitness_Lamarcian(int N, int m, double population[m][N], double lower[N], d
             }
         }
     }
-    // One individual
     else {
         if (*counteval < budget) {
             results[0] = fn_(N, population[0], lower, upper, counteval, fn);
@@ -137,7 +135,6 @@ void fitness_non_Lamarcian(int N, int m, double population[m][N], double populat
         deleteInfsNaNs(N, population[i]);
         deleteInfsNaNs(N, population_repaired[i]);
     }
-    // More than one individual
     if (m > 1) {
         bool repaired_ind[m];
         double vec_dist[m];
@@ -151,23 +148,17 @@ void fitness_non_Lamarcian(int N, int m, double population[m][N], double populat
                 }
                 col_sum += pow(population[i][j] - population_repaired[i][j], 2.0);
             }
-            // repairedInd <- apply(P != P_repaired, 2, all)
             repaired_ind[i] = all_different;
-            // P_fit <- fitness
             population_fit[i] = fitness[i];
-            // vecDist <- colSums((P - P_repaired)^2)
             vec_dist[i] = col_sum;
         }
-        // P_fit[which(repairedInd)] <- worst.fit + vecDist[which(repairedInd)]
         for (int i = 0; i < m; ++i) {
             if (repaired_ind[i] == true) {
                 population_fit[i] = worst_fit + vec_dist[i];
             }
         }
     }
-    // One individual
     else {
-        // P_fit <- fitness - move at the beginning
         for (int i = 0; i < m; ++i) {
             population_fit[i] = fitness[i];
             double col_sum = 0.0;
@@ -184,7 +175,6 @@ void fitness_non_Lamarcian(int N, int m, double population[m][N], double populat
             }
         }
     }
-    // P_fit <- deleteInfsNaNs(P_fit)
     deleteInfsNaNs(m, population_fit);
 }
 
@@ -316,7 +306,7 @@ struct result des(int N, double function_fn(int N, double[]), double lower[], do
         double weights_sum = 0;
 
         for (int i = 0; i < mu; ++i) {
-            weights_sum += weights[i] = 1; // log(mu + 1) - log(i + 1);
+            weights_sum += weights[i] = 1;
         }
         for (int i = 0; i < mu; ++i) {
             weights[i] /= weights_sum;
@@ -325,7 +315,7 @@ struct result des(int N, double function_fn(int N, double[]), double lower[], do
         double weights_pop[lambda];
         double weights_pop_sum = 0;
         for (int i = 0; i < lambda; ++i) {
-            weights_pop_sum += weights_pop[i] = 1; // log(lambda + 1) - log(i + 1);
+            weights_pop_sum += weights_pop[i] = 1;
         }
         for (int i = 0; i < lambda; ++i) {
             weights_pop[i] /= weights_pop_sum;
