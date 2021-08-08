@@ -5,6 +5,5 @@ The aim of the project was to implement algorithm and test it's convergence as w
 
 ### Source: 
 Differential Evolution Strategy
-> J. Arabas D. Jagodziński.  A differential evolution strategy.  
-In2017 IEEECongress on Evolutionary Computation (CEC), pages 1872–1876, 2017. 
-Access: [https://pzawistowski.github.io/assets/wae/DES.pdf(https://pzawistowski.github.io/assets/wae/DES.pdf)
+> J. Arabas D. Jagodziński.  A differential evolution strategy. In 2017 IEEE Congress on Evolutionary Computation (CEC), pages 1872–1876, 2017. 
+Access: [https://pzawistowski.github.io/assets/wae/DES.pdf](https://pzawistowski.github.io/assets/wae/DES.pdf)
