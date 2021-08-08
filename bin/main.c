@@ -3,7 +3,7 @@
 #include <time.h>
 
 #include "des.h"
-#include "test_funtions.h"
+#include "test_functions.h"
 
 void test_dim5(int seed, int n_times)
 {

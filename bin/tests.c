@@ -4,7 +4,7 @@
 #include <time.h>
 
 #include "des.h"
-#include "test_funtions.h"
+#include "test_functions.h"
 
 void print_result(int N, struct result res)
 {
